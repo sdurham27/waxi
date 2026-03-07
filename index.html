@@ -263,7 +263,7 @@
         <label>Password</label>
         <input type="password" id="signup-password" placeholder="min 6 characters"/>
       </div>
-      <button class="btn" onclick="signup()">Get on Wax</button>
+      <button class="btn" onclick="signup()">Get on Waxi</button>
       <div class="message" id="signup-msg"></div>
     </div>
   </div>
@@ -331,10 +331,10 @@
     if (error) {
       msg('signup-msg', error.message, 'error');
       btn.disabled = false;
-      btn.textContent = 'Get on Wax';
+      btn.textContent = 'Get on Waxi';
     } else {
       msg('signup-msg', 'Check your email to confirm your account!', 'success');
-      btn.textContent = 'Get on Wax';
+      btn.textContent = 'Get on Waxi';
       btn.disabled = false;
     }
   }
