@@ -323,19 +323,25 @@
     btn.disabled = true;
     btn.textContent = 'Pressing...';
 
-    const { error } = await sb.auth.signUp({
+    const { data, error } = await sb.auth.signUp({
       email, password: pass,
       options: { data: { dj_name: name } }
     });
 
+    btn.disabled = false;
+    btn.textContent = 'Get on Waxi';
+
     if (error) {
       msg('signup-msg', error.message, 'error');
-      btn.disabled = false;
-      btn.textContent = 'Get on Waxi';
+    } else if (data?.user?.identities?.length === 0) {
+      // Supabase returns an empty identities array when the email is already registered
+      msg('signup-msg', 'This email is already registered — try logging in instead.', 'error');
+      setTimeout(() => {
+        document.querySelectorAll('.tab')[0].click();
+        document.getElementById('login-email').value = email;
+      }, 1500);
     } else {
       msg('signup-msg', 'Check your email to confirm your account!', 'success');
-      btn.textContent = 'Get on Waxi';
-      btn.disabled = false;
     }
   }
 
