@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Waxi — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #080808;
+    --white: #f0ede6;
+    --cream: #e8e0d0;
+    --gold: #c9a84c;
+    --gold-light: #e2c47a;
+    --groove: #111;
+    --border: #1e1e1e;
+    --muted: #555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* Grain */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.3;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+  }
+
+  .logo span { color: var(--gold); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .dj-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .logout-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .logout-btn:hover { color: var(--white); border-color: #444; }
+
+  /* Main */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+  }
+
+  .page-header {
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    letter-spacing: 0.05em;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .page-subtitle {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stats bar */
+  .stats {
+    display: flex;
+    gap: 1px;
+    margin-bottom: 2.5rem;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  .stat {
+    flex: 1;
+    background: var(--groove);
+    padding: 1.2rem 1.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 0.3rem;
+  }
+
+  /* Recordings list */
+  .recordings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.5s 0.15s ease both;
+  }
+
+  .section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .recordings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .recording-item {
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 1.5rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .recording-item:hover {
+    border-color: #2a2a2a;
+    background: #131313;
+  }
+
+  .recording-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .recording-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  .recording-size {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* Audio player */
+  .player-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .play-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
+  .play-btn svg { width: 14px; height: 14px; fill: #080808; margin-left: 2px; }
+  .play-btn.playing svg { margin-left: 0; }
+
+  .download-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.35rem 0.7rem;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .download-btn:hover { color: var(--white); border-color: #444; }
+
+  /* Now playing bar */
+  #now-playing {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border);
+    padding: 1rem 2.5rem;
+    display: none;
+    align-items: center;
+    gap: 1.5rem;
+    z-index: 50;
+    animation: slideUp 0.3s ease;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+
+  #now-playing.visible { display: flex; }
+
+  .np-info { flex: 1; min-width: 0; }
+
+  .np-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .np-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--white);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .np-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .stop-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color 0.2s;
+  }
+
+  .stop-btn:hover { color: var(--white); }
+
+  audio#player { display: none; }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 5rem 2rem;
+    border: 1px dashed #1e1e1e;
+    border-radius: 4px;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+  }
+
+  .empty-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    color: #333;
+    letter-spacing: 0.1em;
+  }
+
+  .empty-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: #2a2a2a;
+    margin-top: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 3rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid #222;
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">WAX<span>I</span></div>
+  <div class="nav-right">
+    <div class="dj-name" id="nav-dj-name">—</div>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+</nav>
+
+<main>
+  <div class="page-header">
+    <div class="page-title" id="page-title">YOUR SETS</div>
+    <div class="page-subtitle" id="page-subtitle">Loading your recordings...</div>
+  </div>
+
+  <div class="stats" id="stats" style="display:none">
+    <div class="stat">
+      <div class="stat-value" id="stat-count">0</div>
+      <div class="stat-label">Recordings</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-size">0 MB</div>
+      <div class="stat-label">Total Size</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value" id="stat-latest">—</div>
+      <div class="stat-label">Latest Set</div>
+    </div>
+  </div>
+
+  <div class="recordings-header">
+    <div class="section-title">Recordings</div>
+  </div>
+
+  <div id="recordings-container">
+    <div class="loading">
+      <div class="spinner"></div>
+      Loading your sets...
+    </div>
+  </div>
+</main>
+
+<!-- Now playing bar -->
+<div id="now-playing">
+  <div class="np-info">
+    <div class="np-label">▶ Now Playing</div>
+    <div class="np-name" id="np-name">—</div>
+  </div>
+  <div class="np-controls">
+    <button class="stop-btn" onclick="stopAudio()">◼ Stop</button>
+  </div>
+</div>
+
+<audio id="player"></audio>
+
+<script>
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://axhhkmobmvkznmkiplso.supabase.co',
+    'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
+  );
+
+  let currentUser = null;
+  let currentAudio = null;
+  let currentBtn   = null;
+  const player     = document.getElementById('player');
+
+  // Auth check
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      window.location.href = 'index.html';
+      return;
+    }
+    currentUser = session.user;
+    const djName = currentUser.user_metadata?.dj_name || currentUser.email;
+    document.getElementById('nav-dj-name').textContent = djName;
+    document.getElementById('page-title').textContent  = djName.toUpperCase() + "'S SETS";
+    loadRecordings();
+  }
+
+  async function loadRecordings() {
+    const djName = currentUser.user_metadata?.dj_name || currentUser.email.split('@')[0];
+
+    // List files in storage bucket under this DJ's folder
+    const { data: files, error } = await sb.storage
+      .from('recordings')
+      .list(djName, { sortBy: { column: 'created_at', order: 'desc' } });
+
+    const container = document.getElementById('recordings-container');
+
+    if (error || !files || files.length === 0) {
+      document.getElementById('page-subtitle').textContent = 'No sets yet — get recording!';
+      container.innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">💿</div>
+          <div class="empty-title">No Sets Yet</div>
+          <div class="empty-sub">Your recordings will appear here once you go live</div>
+        </div>`;
+      return;
+    }
+
+    // Filter to only MP3s
+    const mp3s = files.filter(f => f.name.endsWith('.mp3'));
+
+    // Stats
+    const totalSize = mp3s.reduce((acc, f) => acc + (f.metadata?.size || 0), 0);
+    const latest    = mp3s[0]?.name.replace('.mp3', '').split('-').slice(1).join('-') || '—';
+
+    document.getElementById('stat-count').textContent = mp3s.length;
+    document.getElementById('stat-size').textContent  = formatBytes(totalSize);
+    document.getElementById('stat-latest').textContent = formatDate(mp3s[0]?.created_at);
+    document.getElementById('stats').style.display    = 'flex';
+    document.getElementById('page-subtitle').textContent = `${mp3s.length} recording${mp3s.length !== 1 ? 's' : ''} in your vault`;
+
+    // Render list
+    container.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'recordings-list';
+
+    for (const file of mp3s) {
+      const { data: urlData } = await sb.storage
+        .from('recordings')
+        .createSignedUrl(`${djName}/${file.name}`, 3600);
+
+      const url  = urlData?.signedUrl;
+      const size = formatBytes(file.metadata?.size || 0);
+      const date = formatDate(file.created_at);
+      const id   = 'rec-' + Math.random().toString(36).slice(2);
+
+      const item = document.createElement('div');
+      item.className = 'recording-item';
+      item.innerHTML = `
+        <div>
+          <div class="recording-name">${file.name.replace('.mp3', '')}</div>
+          <div class="recording-meta">${date} · ${size}</div>
+        </div>
+        <div class="player-wrap">
+          <button class="play-btn" id="${id}" onclick="togglePlay('${url}', '${file.name}', '${id}')">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <a class="download-btn" href="${url}" download="${file.name}">↓ Download</a>
+        </div>
+      `;
+      list.appendChild(item);
+    }
+
+    container.appendChild(list);
+  }
+
+  function togglePlay(url, name, btnId) {
+    const btn = document.getElementById(btnId);
+
+    if (currentAudio === url && !player.paused) {
+      player.pause();
+      setPlayIcon(btn, false);
+      document.getElementById('now-playing').classList.remove('visible');
+      currentAudio = null;
+      currentBtn   = null;
+      return;
+    }
+
+    if (currentBtn) setPlayIcon(currentBtn, false);
+
+    player.src = url;
+    player.play();
+    currentAudio = url;
+    currentBtn   = btn;
+    setPlayIcon(btn, true);
+    document.getElementById('np-name').textContent = name.replace('.mp3', '');
+    document.getElementById('now-playing').classList.add('visible');
+  }
+
+  function setPlayIcon(btn, playing) {
+    btn.innerHTML = playing
+      ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+      : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+  }
+
+  function stopAudio() {
+    player.pause();
+    player.src = '';
+    if (currentBtn) setPlayIcon(currentBtn, false);
+    document.getElementById('now-playing').classList.remove('visible');
+    currentAudio = null;
+    currentBtn   = null;
+  }
+
+  player.addEventListener('ended', () => {
+    if (currentBtn) setPlayIcon(currentBtn, false);
+    document.getElementById('now-playing').classList.remove('visible');
+    currentAudio = null;
+    currentBtn   = null;
+  });
+
+  async function logout() {
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes) return '—';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function formatDate(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  init();
+</script>
+</body>
+</html>
