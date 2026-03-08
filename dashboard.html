@@ -265,6 +265,23 @@
 
   .download-btn:hover { color: var(--white); border-color: #444; }
 
+  .delete-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.35rem 0.7rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+
+  .delete-btn:hover:not(:disabled) { color: #e05555; border-color: #5a2020; }
+  .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
   /* Now playing bar */
   #now-playing {
     position: fixed;
@@ -511,6 +528,9 @@
 
       const item = document.createElement('div');
       item.className = 'recording-item';
+      item.dataset.size     = file.metadata?.size || 0;
+      item.dataset.djname   = djName;
+      item.dataset.filename = file.name;
       item.innerHTML = `
         <div>
           <div class="recording-name">${file.name.replace('.mp3', '')}</div>
@@ -521,12 +541,66 @@
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
           <a class="download-btn" href="${url}" download="${file.name}">↓ Download</a>
+          <button class="delete-btn" onclick="deleteRecording(this)">✕ Delete</button>
         </div>
       `;
       list.appendChild(item);
     }
 
     container.appendChild(list);
+  }
+
+  async function deleteRecording(btn) {
+    const item     = btn.closest('.recording-item');
+    const djName   = item.dataset.djname;
+    const fileName = item.dataset.filename;
+
+    if (!confirm(`Delete "${fileName.replace('.mp3', '')}"?\nThis cannot be undone.`)) return;
+
+    btn.disabled    = true;
+    btn.textContent = 'Deleting...';
+
+    // Stop audio if this track is currently playing
+    const playBtn = item.querySelector('.play-btn');
+    if (currentBtn === playBtn) stopAudio();
+
+    const { error } = await sb.storage
+      .from('recordings')
+      .remove([`${djName}/${fileName}`]);
+
+    if (error) {
+      btn.disabled    = false;
+      btn.textContent = '✕ Delete';
+      alert('Failed to delete: ' + error.message);
+      return;
+    }
+
+    item.style.transition = 'opacity 0.3s, transform 0.3s';
+    item.style.opacity    = '0';
+    item.style.transform  = 'translateX(-10px)';
+    setTimeout(() => { item.remove(); updateStats(); }, 300);
+  }
+
+  function updateStats() {
+    const items     = document.querySelectorAll('.recording-item');
+    const count     = items.length;
+    const totalSize = Array.from(items).reduce((acc, el) => acc + parseInt(el.dataset.size || 0, 10), 0);
+
+    if (count === 0) {
+      document.getElementById('stats').style.display = 'none';
+      document.getElementById('page-subtitle').textContent = 'No sets yet — get recording!';
+      document.getElementById('recordings-container').innerHTML = `
+        <div class="empty">
+          <div class="empty-icon">💿</div>
+          <div class="empty-title">No Sets Yet</div>
+          <div class="empty-sub">Your recordings will appear here once you go live</div>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('stat-count').textContent = count;
+    document.getElementById('stat-size').textContent  = formatBytes(totalSize);
+    document.getElementById('page-subtitle').textContent = `${count} recording${count !== 1 ? 's' : ''} in your vault`;
   }
 
   function togglePlay(url, name, btnId) {
