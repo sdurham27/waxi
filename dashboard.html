@@ -295,6 +295,21 @@
   .delete-btn:hover:not(:disabled) { color: #e05555; border-color: #5a2020; }
   .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+  .share-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.35rem 0.7rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+  }
+  .share-btn:hover { color: var(--white); border-color: #444; }
+
   /* Now playing bar */
   #now-playing {
     position: fixed;
@@ -406,6 +421,16 @@
   }
 
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; border: 1px solid #333; border-radius: 3px;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--white);
+    padding: 0.65rem 1.2rem; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 200; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
 </style>
 </head>
 <body>
@@ -467,6 +492,7 @@
 </div>
 
 <audio id="player"></audio>
+<div id="toast"></div>
 
 <script>
   const { createClient } = supabase;
@@ -577,6 +603,7 @@
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
           <a class="download-btn" href="${url}" download="${file.name}" onclick="logEvent('download',{file:'${file.name}'})">↓ Download</a>
+          <button class="share-btn" onclick="shareRecording(this, '${djName}', '${file.name}')">⬡ Share</button>
           <button class="delete-btn" onclick="deleteRecording(this)">✕ Delete</button>
         </div>
       `;
@@ -584,6 +611,17 @@
     }
 
     container.appendChild(list);
+  }
+
+  function shareRecording(btn, djName, fileName) {
+    const shareUrl = `https://waxi-theta.vercel.app/player.html?dj=${encodeURIComponent(djName)}&file=${encodeURIComponent(fileName)}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }).catch(() => {
+      prompt('Copy this link:', shareUrl);
+    });
   }
 
   async function deleteRecording(btn) {

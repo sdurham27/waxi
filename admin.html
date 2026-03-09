@@ -53,7 +53,7 @@
     z-index: 50;
   }
 
-  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; }
+  .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; text-decoration: none; color: inherit; }
   .logo span { color: var(--gold); }
 
   .admin-badge {
@@ -106,7 +106,7 @@
   .nav-link:hover { color: var(--white); }
 
   /* Main */
-  main { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
+  main { max-width: 1060px; margin: 0 auto; padding: 3rem 2rem 6rem; }
 
   .page-header { margin-bottom: 2.5rem; animation: fadeUp 0.5s ease both; }
   .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 3.5rem; letter-spacing: 0.05em; line-height: 1; }
@@ -136,89 +136,118 @@
   }
   .section-title { font-family: 'DM Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
 
-  /* DJ list */
-  .dj-list { display: flex; flex-direction: column; gap: 2px; animation: fadeUp 0.5s 0.2s ease both; }
+  /* User list */
+  .user-list { display: flex; flex-direction: column; gap: 2px; animation: fadeUp 0.5s 0.2s ease both; }
 
-  .dj-row {
+  .user-row {
     background: var(--groove);
     border: 1px solid var(--border);
     border-radius: 3px;
     overflow: hidden;
     transition: border-color 0.2s;
   }
-  .dj-row:hover { border-color: #2a2a2a; }
+  .user-row:hover { border-color: #2a2a2a; }
 
-  .dj-header {
-    padding: 1rem 1.5rem;
+  .user-header {
+    padding: 0.85rem 1.2rem;
     display: grid;
-    grid-template-columns: 1fr auto auto auto auto;
+    grid-template-columns: minmax(120px,1.4fr) minmax(150px,2fr) 80px 100px auto;
     align-items: center;
-    gap: 1.5rem;
-    cursor: pointer;
-    user-select: none;
+    gap: 1rem;
   }
 
-  .dj-name-big { font-family: 'DM Mono', monospace; font-size: 0.9rem; color: var(--white); }
-  .dj-meta { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); }
+  /* Name inline edit */
+  .user-name-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    color: var(--white);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+  .user-name-display span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .edit-icon { color: var(--muted); font-size: 0.75rem; flex-shrink: 0; opacity: 0; transition: opacity 0.15s; }
+  .user-name-display:hover .edit-icon { opacity: 1; }
 
-  .expand-btn {
+  .name-edit-wrap { display: none; align-items: center; gap: 0.4rem; }
+  .name-edit-wrap.active { display: flex; }
+  .name-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.82rem;
+    background: #0d0d0d;
+    border: 1px solid var(--gold);
+    color: var(--white);
+    padding: 0.25rem 0.5rem;
+    border-radius: 2px;
+    width: 130px;
+    outline: none;
+  }
+  .name-save-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    color: #080808; background: var(--gold); border: none;
+    padding: 0.28rem 0.55rem; border-radius: 2px; cursor: pointer;
+    transition: background 0.15s; white-space: nowrap;
+  }
+  .name-save-btn:hover { background: var(--gold-light); }
+  .name-cancel-btn {
+    font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    color: var(--muted); background: none; border: 1px solid #333;
+    padding: 0.28rem 0.5rem; border-radius: 2px; cursor: pointer;
+  }
+
+  .user-email {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Tier select */
+  .tier-select {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: #0d0d0d;
+    border: 1px solid #2a2a2a;
+    border-radius: 2px;
+    color: var(--muted);
+    padding: 0.28rem 0.4rem;
+    cursor: pointer;
+    outline: none;
+    width: 80px;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .tier-select:hover { border-color: #444; color: var(--white); }
+  .tier-select.tier-pro { color: var(--gold); border-color: #3a2e10; }
+  .tier-select.tier-label { color: var(--gold); border-color: var(--gold); }
+
+  .user-joined {
     font-family: 'DM Mono', monospace;
     font-size: 0.68rem;
     color: var(--muted);
-    background: none;
-    border: 1px solid #222;
-    padding: 0.3rem 0.6rem;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
+    white-space: nowrap;
   }
-  .expand-btn:hover { color: var(--white); border-color: #444; }
 
-  /* DJ recordings panel */
-  .dj-recordings {
-    display: none;
-    border-top: 1px solid var(--border);
-    background: #0d0d0d;
-  }
-  .dj-recordings.open { display: block; }
-
-  .dj-recordings-inner { padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 2px; }
-
-  .recording-item {
-    background: #131313;
-    border: 1px solid #1a1a1a;
-    border-radius: 3px;
-    padding: 0.8rem 1.2rem;
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: center;
-    gap: 1rem;
-    transition: border-color 0.2s;
-  }
-  .recording-item:hover { border-color: #2a2a2a; }
-
-  .recording-name { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .recording-meta { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-top: 0.15rem; }
-
-  .player-wrap { display: flex; align-items: center; gap: 0.6rem; }
-
-  .play-btn {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: var(--gold); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; transition: background 0.2s, transform 0.1s;
-  }
-  .play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
-  .play-btn svg { width: 12px; height: 12px; fill: #080808; margin-left: 2px; }
+  /* User action buttons */
+  .user-actions { display: flex; align-items: center; gap: 0.4rem; justify-content: flex-end; }
 
   .action-btn {
     font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
     color: var(--muted);
     background: none;
     border: 1px solid #222;
-    padding: 0.3rem 0.6rem;
+    padding: 0.28rem 0.55rem;
     border-radius: 2px;
     cursor: pointer;
     text-decoration: none;
@@ -228,6 +257,42 @@
   .action-btn:hover { color: var(--white); border-color: #444; }
   .action-btn.danger:hover:not(:disabled) { color: var(--red); border-color: var(--red-border); }
   .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Recordings panel */
+  .user-recordings {
+    display: none;
+    border-top: 1px solid var(--border);
+    background: #0d0d0d;
+  }
+  .user-recordings.open { display: block; }
+  .user-recordings-inner { padding: 1rem 1.2rem; display: flex; flex-direction: column; gap: 2px; }
+
+  .recording-item {
+    background: #131313;
+    border: 1px solid #1a1a1a;
+    border-radius: 3px;
+    padding: 0.7rem 1rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.2s;
+  }
+  .recording-item:hover { border-color: #2a2a2a; }
+
+  .recording-name { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--white); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .recording-meta { font-family: 'DM Mono', monospace; font-size: 0.66rem; color: var(--muted); margin-top: 0.12rem; }
+
+  .rec-actions { display: flex; align-items: center; gap: 0.5rem; }
+
+  .play-btn {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--gold); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: background 0.2s, transform 0.1s;
+  }
+  .play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
+  .play-btn svg { width: 11px; height: 11px; fill: #080808; margin-left: 2px; }
 
   /* Event log */
   .log-filters { display: flex; gap: 0.5rem; }
@@ -254,38 +319,25 @@
   }
 
   .log-table { width: 100%; border-collapse: collapse; }
-
   .log-table th {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: var(--groove);
-    padding: 0.7rem 1rem;
-    text-align: left;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--muted); background: var(--groove);
+    padding: 0.7rem 1rem; text-align: left;
     border-bottom: 1px solid var(--border);
   }
-
   .log-table td {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--white);
-    padding: 0.65rem 1rem;
-    border-bottom: 1px solid #141414;
-    vertical-align: top;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem;
+    color: var(--white); padding: 0.65rem 1rem;
+    border-bottom: 1px solid #141414; vertical-align: top;
   }
-
   .log-table tr:last-child td { border-bottom: none; }
   .log-table tr:hover td { background: #0d0d0d; }
 
   .event-type {
-    display: inline-block;
-    padding: 0.15rem 0.4rem;
-    border-radius: 2px;
-    font-size: 0.62rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    display: inline-block; padding: 0.15rem 0.4rem;
+    border-radius: 2px; font-size: 0.62rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
   }
   .event-type.recording_started  { background: #1a2a1a; color: #4caf70; }
   .event-type.recording_complete { background: #1a2a1a; color: #4caf70; }
@@ -299,10 +351,8 @@
   .log-detail { color: var(--muted); font-size: 0.68rem; }
 
   .refresh-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem;
+    color: var(--muted); letter-spacing: 0.08em;
   }
 
   /* Now playing bar */
@@ -325,14 +375,23 @@
   .loading { text-align: center; padding: 2.5rem; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); letter-spacing: 0.1em; }
   .spinner { width: 20px; height: 20px; border: 2px solid #222; border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto 0.8rem; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   .empty-log { text-align: center; padding: 2rem; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: #2a2a2a; letter-spacing: 0.1em; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 5rem; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; border: 1px solid #333; border-radius: 3px;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--white);
+    padding: 0.65rem 1.2rem; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 200; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
 </style>
 </head>
 <body>
 
 <nav>
-  <a class="logo" href="index.html" style="text-decoration:none;color:inherit">WAX<span>I</span><span class="admin-badge">ADMIN</span></a>
+  <a class="logo" href="index.html">WAX<span>I</span><span class="admin-badge">ADMIN</span></a>
   <div style="display:flex;align-items:center;gap:0.25rem">
     <a href="dashboard.html" class="nav-link">Dashboard</a>
     <a href="pricing.html" class="nav-link">Pricing</a>
@@ -351,25 +410,25 @@
 
   <div class="stats" id="stats" style="display:none">
     <div class="stat">
-      <div class="stat-value" id="stat-djs">0</div>
-      <div class="stat-label">DJs</div>
+      <div class="stat-value" id="stat-users">0</div>
+      <div class="stat-label">Users</div>
     </div>
     <div class="stat">
       <div class="stat-value" id="stat-recordings">0</div>
       <div class="stat-label">Recordings</div>
     </div>
     <div class="stat">
-      <div class="stat-value" id="stat-size">0 MB</div>
+      <div class="stat-value" id="stat-size">—</div>
       <div class="stat-label">Total Storage</div>
     </div>
   </div>
 
-  <!-- DJs section -->
+  <!-- Users section -->
   <div class="section-header">
-    <div class="section-title">All DJs</div>
+    <div class="section-title">All Users</div>
   </div>
-  <div id="dj-list-container">
-    <div class="loading"><div class="spinner"></div>Loading DJs...</div>
+  <div id="user-list-container">
+    <div class="loading"><div class="spinner"></div>Loading users...</div>
   </div>
 
   <!-- Event log section -->
@@ -402,6 +461,7 @@
 </div>
 
 <audio id="player"></audio>
+<div id="toast"></div>
 
 <script>
   const { createClient } = supabase;
@@ -409,6 +469,9 @@
     'https://axhhkmobmvkznmkiplso.supabase.co',
     'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
   );
+
+  const SUPABASE_URL  = 'https://axhhkmobmvkznmkiplso.supabase.co';
+  const PLAYER_BASE   = 'https://waxi-theta.vercel.app/player.html';
 
   let currentUser  = null;
   let currentAudio = null;
@@ -424,7 +487,6 @@
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = 'index.html'; return; }
 
-    // Admin check by user UUID — DJ name alone is not trustworthy
     const { data: adminRow } = await sb
       .from('admin_users')
       .select('user_id')
@@ -437,127 +499,340 @@
     const djName = session.user.user_metadata?.dj_name || session.user.email;
     document.getElementById('nav-dj-name').textContent = djName;
 
-    await Promise.all([loadAllDJs(), loadEventLogs()]);
-
-    // Auto-refresh event log every 30s
+    await Promise.all([loadAllUsers(), loadEventLogs()]);
     refreshTimer = setInterval(loadEventLogs, 30000);
   }
 
-  // ── DJs ──────────────────────────────────────────────────
+  // ── Users ─────────────────────────────────────────────────
 
-  async function loadAllDJs() {
-    const { data: folders, error } = await sb.storage
-      .from('recordings')
-      .list('', { sortBy: { column: 'name', order: 'asc' } });
+  async function loadAllUsers() {
+    const { data: users, error } = await sb
+      .from('dj_profiles')
+      .select('*')
+      .order('created_at', { ascending: false });
 
-    const container = document.getElementById('dj-list-container');
+    const container = document.getElementById('user-list-container');
 
-    if (error || !folders || folders.length === 0) {
-      container.innerHTML = '<div class="empty-log">No DJ folders found.</div>';
+    if (error) {
+      container.innerHTML = `<div class="empty-log">Could not load users: ${escHtml(error.message)}</div>`;
       return;
     }
 
-    // Only show folders (items without an extension)
-    const djs = folders.filter(f => !f.name.includes('.'));
-
-    if (djs.length === 0) {
-      container.innerHTML = '<div class="empty-log">No DJ folders found.</div>';
+    if (!users || users.length === 0) {
+      container.innerHTML = '<div class="empty-log">No registered users yet.</div>';
+      document.getElementById('stat-users').textContent = '0';
+      document.getElementById('stats').style.display = 'flex';
       return;
     }
 
-    // Load each DJ's recording list in parallel
-    const djData = await Promise.all(djs.map(async (folder) => {
-      const { data: files } = await sb.storage
-        .from('recordings')
-        .list(folder.name, { sortBy: { column: 'created_at', order: 'desc' } });
-      const mp3s = (files || []).filter(f => f.name.endsWith('.mp3'));
-      const size = mp3s.reduce((acc, f) => acc + (f.metadata?.size || 0), 0);
-      return { name: folder.name, files: mp3s, size };
-    }));
-
-    // Global stats
-    const totalRecordings = djData.reduce((acc, d) => acc + d.files.length, 0);
-    const totalSize       = djData.reduce((acc, d) => acc + d.size, 0);
-    document.getElementById('stat-djs').textContent        = djData.length;
-    document.getElementById('stat-recordings').textContent = totalRecordings;
-    document.getElementById('stat-size').textContent       = formatBytes(totalSize);
-    document.getElementById('stats').style.display         = 'flex';
-    document.getElementById('page-subtitle').textContent   =
-      `${djData.length} DJ${djData.length !== 1 ? 's' : ''} · ${totalRecordings} recording${totalRecordings !== 1 ? 's' : ''}`;
+    document.getElementById('stat-users').textContent = users.length;
+    document.getElementById('page-subtitle').textContent =
+      `${users.length} registered user${users.length !== 1 ? 's' : ''}`;
+    document.getElementById('stats').style.display = 'flex';
 
     container.innerHTML = '';
     const list = document.createElement('div');
-    list.className = 'dj-list';
+    list.className = 'user-list';
 
-    for (const dj of djData) {
-      const row = document.createElement('div');
-      row.className = 'dj-row';
-
-      const lastDate = dj.files[0]?.created_at ? formatDate(dj.files[0].created_at) : '—';
-
-      row.innerHTML = `
-        <div class="dj-header" onclick="toggleDJ(this)">
-          <div class="dj-name-big">${dj.name}</div>
-          <div class="dj-meta">${dj.files.length} recording${dj.files.length !== 1 ? 's' : ''}</div>
-          <div class="dj-meta">${formatBytes(dj.size)}</div>
-          <div class="dj-meta">Last: ${lastDate}</div>
-          <button class="expand-btn">▶ View</button>
-        </div>
-        <div class="dj-recordings">
-          <div class="dj-recordings-inner" id="files-${dj.name}"></div>
-        </div>
-      `;
-
+    for (const user of users) {
+      const row = buildUserRow(user);
       list.appendChild(row);
-
-      // Pre-render recordings (hidden until expanded)
-      const filesEl = row.querySelector(`#files-${dj.name}`);
-      if (dj.files.length === 0) {
-        filesEl.innerHTML = '<div class="empty-log">No recordings yet.</div>';
-      } else {
-        for (const file of dj.files) {
-          const { data: urlData } = await sb.storage
-            .from('recordings')
-            .createSignedUrl(`${dj.name}/${file.name}`, 3600);
-          const url  = urlData?.signedUrl;
-          const size = formatBytes(file.metadata?.size || 0);
-          const date = formatDate(file.created_at);
-          const id   = 'ap-' + Math.random().toString(36).slice(2);
-
-          const item = document.createElement('div');
-          item.className = 'recording-item';
-          item.dataset.size     = file.metadata?.size || 0;
-          item.dataset.djname   = dj.name;
-          item.dataset.filename = file.name;
-          item.innerHTML = `
-            <div>
-              <div class="recording-name">${file.name.replace('.mp3', '')}</div>
-              <div class="recording-meta">${date} · ${size}</div>
-            </div>
-            <div class="player-wrap">
-              <button class="play-btn" id="${id}" onclick="togglePlay('${url}', '${file.name}', '${id}')">
-                <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-              </button>
-              <a class="action-btn" href="${url}" download="${file.name}">↓ Download</a>
-              <button class="action-btn danger" onclick="deleteRecording(this)">✕ Delete</button>
-            </div>
-          `;
-          filesEl.appendChild(item);
-        }
-      }
     }
 
     container.appendChild(list);
   }
 
-  function toggleDJ(header) {
-    const panel = header.nextElementSibling;
-    const btn   = header.querySelector('.expand-btn');
-    const open  = panel.classList.toggle('open');
-    btn.textContent = open ? '▼ Hide' : '▶ View';
+  function buildUserRow(user) {
+    const row = document.createElement('div');
+    row.className = 'user-row';
+    row.dataset.userId = user.id;
+
+    const tier     = user.tier || 'free';
+    const joined   = user.created_at ? formatDate(user.created_at) : '—';
+    const email    = user.email || '—';
+    const djName   = user.dj_name || '—';
+
+    row.innerHTML = `
+      <div class="user-header">
+        <!-- Name (click to edit) -->
+        <div>
+          <div class="user-name-display" onclick="startNameEdit(this)" title="Click to edit">
+            <span>${escHtml(djName)}</span>
+            <span class="edit-icon">✎</span>
+          </div>
+          <div class="name-edit-wrap">
+            <input class="name-input" type="text" value="${escHtml(djName)}" />
+            <button class="name-save-btn" onclick="saveName(this)">Save</button>
+            <button class="name-cancel-btn" onclick="cancelNameEdit(this)">✕</button>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="user-email" title="${escHtml(email)}">${escHtml(email)}</div>
+
+        <!-- Tier select -->
+        <select class="tier-select tier-${tier}"
+          onchange="saveTier(this, '${escHtml(user.id)}')">
+          <option value="free"  ${tier === 'free'  ? 'selected' : ''}>Free</option>
+          <option value="pro"   ${tier === 'pro'   ? 'selected' : ''}>Pro</option>
+          <option value="label" ${tier === 'label' ? 'selected' : ''}>Label</option>
+        </select>
+
+        <!-- Join date -->
+        <div class="user-joined">${joined}</div>
+
+        <!-- Actions -->
+        <div class="user-actions">
+          <button class="action-btn" onclick="toggleRecordings(this, '${escHtml(user.dj_name || '')}')">▶ View</button>
+          <button class="action-btn" onclick="resetPassword(this, '${escHtml(email)}')">Reset PW</button>
+          <button class="action-btn danger" onclick="deleteUser(this, '${escHtml(user.id)}', '${escHtml(djName)}')">Delete</button>
+        </div>
+      </div>
+
+      <!-- Recordings panel (lazy-loaded) -->
+      <div class="user-recordings" id="recs-${escHtml(user.id)}">
+        <div class="user-recordings-inner" id="recs-inner-${escHtml(user.id)}">
+          <div class="loading"><div class="spinner"></div>Loading recordings...</div>
+        </div>
+      </div>
+    `;
+
+    return row;
   }
 
-  // ── Recording actions ──────────────────────────────────
+  // ── Name edit ─────────────────────────────────────────────
+
+  function startNameEdit(displayEl) {
+    const wrap = displayEl.nextElementSibling;
+    displayEl.style.display = 'none';
+    wrap.classList.add('active');
+    wrap.querySelector('.name-input').focus();
+    wrap.querySelector('.name-input').select();
+  }
+
+  function cancelNameEdit(btn) {
+    const wrap = btn.closest('.name-edit-wrap');
+    const displayEl = wrap.previousElementSibling;
+    wrap.classList.remove('active');
+    displayEl.style.display = '';
+  }
+
+  async function saveName(btn) {
+    const wrap      = btn.closest('.name-edit-wrap');
+    const row       = wrap.closest('.user-row');
+    const userId    = row.dataset.userId;
+    const input     = wrap.querySelector('.name-input');
+    const newName   = input.value.trim();
+    const displayEl = wrap.previousElementSibling;
+
+    if (!newName) { input.focus(); return; }
+
+    btn.disabled    = true;
+    btn.textContent = '...';
+
+    // Check uniqueness (exclude current user)
+    const { data: existing } = await sb
+      .from('dj_profiles')
+      .select('id')
+      .eq('dj_name', newName)
+      .neq('id', userId)
+      .maybeSingle();
+
+    if (existing) {
+      showToast('DJ name already taken');
+      btn.disabled    = false;
+      btn.textContent = 'Save';
+      return;
+    }
+
+    const { error } = await sb
+      .from('dj_profiles')
+      .update({ dj_name: newName })
+      .eq('id', userId);
+
+    if (error) {
+      showToast('Failed to save: ' + error.message);
+      btn.disabled    = false;
+      btn.textContent = 'Save';
+      return;
+    }
+
+    // Update display
+    displayEl.querySelector('span').textContent = newName;
+    wrap.classList.remove('active');
+    displayEl.style.display = '';
+    btn.disabled    = false;
+    btn.textContent = 'Save';
+    showToast('Name updated');
+  }
+
+  // ── Tier ──────────────────────────────────────────────────
+
+  async function saveTier(select, userId) {
+    const tier = select.value;
+    select.disabled = true;
+
+    const { error } = await sb
+      .from('dj_profiles')
+      .update({ tier })
+      .eq('id', userId);
+
+    select.disabled = false;
+    select.className = `tier-select tier-${tier}`;
+
+    if (error) {
+      showToast('Failed to save tier: ' + error.message);
+    } else {
+      showToast(`Tier set to ${tier}`);
+    }
+  }
+
+  // ── Reset password ─────────────────────────────────────────
+
+  async function resetPassword(btn, email) {
+    if (email === '—' || !email) { showToast('No email on file'); return; }
+    if (!confirm(`Send password reset email to ${email}?`)) return;
+
+    btn.disabled    = true;
+    btn.textContent = '...';
+
+    const { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/index.html'
+    });
+
+    btn.disabled    = false;
+    btn.textContent = 'Reset PW';
+
+    if (error) {
+      showToast('Error: ' + error.message);
+    } else {
+      showToast('Reset email sent to ' + email);
+    }
+  }
+
+  // ── Delete user ────────────────────────────────────────────
+
+  async function deleteUser(btn, userId, djName) {
+    if (!confirm(`Permanently delete user "${djName}"?\nThis removes their account. Recordings in storage are NOT deleted (clean up manually).`)) return;
+
+    btn.disabled    = true;
+    btn.textContent = 'Deleting...';
+
+    const { error } = await sb.functions.invoke('admin-delete-user', {
+      body: { userId }
+    });
+
+    if (error) {
+      btn.disabled    = false;
+      btn.textContent = 'Delete';
+      showToast('Delete failed: ' + error.message);
+      return;
+    }
+
+    const row = btn.closest('.user-row');
+    row.style.transition = 'opacity 0.3s, transform 0.3s';
+    row.style.opacity    = '0';
+    row.style.transform  = 'translateX(-10px)';
+    setTimeout(() => {
+      row.remove();
+      const count = document.querySelectorAll('.user-row').length;
+      document.getElementById('stat-users').textContent = count;
+    }, 300);
+    showToast(`${djName} deleted`);
+  }
+
+  // ── Recordings (lazy) ─────────────────────────────────────
+
+  async function toggleRecordings(btn, djName) {
+    const row       = btn.closest('.user-row');
+    const userId    = row.dataset.userId;
+    const panel     = document.getElementById(`recs-${userId}`);
+    const inner     = document.getElementById(`recs-inner-${userId}`);
+    const isOpen    = panel.classList.toggle('open');
+
+    btn.textContent = isOpen ? '▼ Hide' : '▶ View';
+
+    if (!isOpen || panel.dataset.loaded) return;
+    panel.dataset.loaded = '1';
+
+    if (!djName) {
+      inner.innerHTML = '<div class="empty-log">No DJ name set — no recordings folder.</div>';
+      return;
+    }
+
+    const { data: files, error } = await sb.storage
+      .from('recordings')
+      .list(djName, { sortBy: { column: 'created_at', order: 'desc' } });
+
+    if (error) {
+      inner.innerHTML = `<div class="empty-log">Error: ${escHtml(error.message)}</div>`;
+      return;
+    }
+
+    const mp3s = (files || []).filter(f => f.name.endsWith('.mp3'));
+
+    if (mp3s.length === 0) {
+      inner.innerHTML = '<div class="empty-log">No recordings yet.</div>';
+      // Still update storage stats
+      return;
+    }
+
+    inner.innerHTML = '';
+
+    // Tally storage for stat bar
+    let totalBytes = 0;
+    let totalRecs  = 0;
+
+    for (const file of mp3s) {
+      const { data: urlData } = await sb.storage
+        .from('recordings')
+        .createSignedUrl(`${djName}/${file.name}`, 3600);
+      const url  = urlData?.signedUrl || '#';
+      const size = formatBytes(file.metadata?.size || 0);
+      const date = formatDate(file.created_at);
+      const id   = 'ap-' + Math.random().toString(36).slice(2);
+      const shareUrl = `${PLAYER_BASE}?dj=${encodeURIComponent(djName)}&file=${encodeURIComponent(file.name)}`;
+
+      totalBytes += file.metadata?.size || 0;
+      totalRecs++;
+
+      const item = document.createElement('div');
+      item.className = 'recording-item';
+      item.dataset.size     = file.metadata?.size || 0;
+      item.dataset.djname   = djName;
+      item.dataset.filename = file.name;
+      item.innerHTML = `
+        <div>
+          <div class="recording-name">${escHtml(file.name.replace('.mp3', ''))}</div>
+          <div class="recording-meta">${date} · ${size}</div>
+        </div>
+        <div class="rec-actions">
+          <button class="play-btn" id="${id}" onclick="togglePlay('${escHtml(url)}', '${escHtml(file.name)}', '${id}')">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+          <a class="action-btn" href="${escHtml(url)}" download="${escHtml(file.name)}">↓ Download</a>
+          <button class="action-btn" onclick="shareRecording(this, '${escHtml(shareUrl)}')">⬡ Share</button>
+          <button class="action-btn danger" onclick="deleteRecording(this)">✕ Delete</button>
+        </div>
+      `;
+      inner.appendChild(item);
+    }
+
+    // Update global stats
+    updateGlobalStats();
+  }
+
+  function updateGlobalStats() {
+    const allItems  = document.querySelectorAll('.recording-item');
+    const totalRec  = allItems.length;
+    const totalSize = Array.from(allItems).reduce((acc, el) => acc + parseInt(el.dataset.size || 0, 10), 0);
+    if (totalRec > 0) {
+      document.getElementById('stat-recordings').textContent = totalRec;
+      document.getElementById('stat-size').textContent       = formatBytes(totalSize);
+    }
+  }
+
+  // ── Recording actions ──────────────────────────────────────
 
   async function deleteRecording(btn) {
     const item     = btn.closest('.recording-item');
@@ -567,7 +842,7 @@
     if (!confirm(`Delete "${fileName.replace('.mp3', '')}" from ${djName}?\nThis cannot be undone.`)) return;
 
     btn.disabled    = true;
-    btn.textContent = 'Deleting...';
+    btn.textContent = '...';
 
     const playBtn = item.querySelector('.play-btn');
     if (currentBtn === playBtn) stopAudio();
@@ -579,32 +854,27 @@
     if (error) {
       btn.disabled    = false;
       btn.textContent = '✕ Delete';
-      alert('Failed to delete: ' + error.message);
+      showToast('Delete failed: ' + error.message);
       return;
     }
 
     item.style.transition = 'opacity 0.3s, transform 0.3s';
     item.style.opacity    = '0';
     item.style.transform  = 'translateX(-10px)';
-    setTimeout(() => {
-      item.remove();
-      updateGlobalStats();
-    }, 300);
+    setTimeout(() => { item.remove(); updateGlobalStats(); }, 300);
   }
 
-  function updateGlobalStats() {
-    const allItems    = document.querySelectorAll('.recording-item');
-    const totalRec    = allItems.length;
-    const totalSize   = Array.from(allItems).reduce((acc, el) => acc + parseInt(el.dataset.size || 0, 10), 0);
-    const djRows      = document.querySelectorAll('.dj-row').length;
-
-    document.getElementById('stat-recordings').textContent = totalRec;
-    document.getElementById('stat-size').textContent       = formatBytes(totalSize);
-    document.getElementById('page-subtitle').textContent   =
-      `${djRows} DJ${djRows !== 1 ? 's' : ''} · ${totalRec} recording${totalRec !== 1 ? 's' : ''}`;
+  function shareRecording(btn, shareUrl) {
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    }).catch(() => {
+      showToast('Could not copy — try manually: ' + shareUrl);
+    });
   }
 
-  // ── Audio ─────────────────────────────────────────────
+  // ── Audio ─────────────────────────────────────────────────
 
   function togglePlay(url, name, btnId) {
     const btn = document.getElementById(btnId);
@@ -641,7 +911,7 @@
     currentAudio = null; currentBtn = null;
   });
 
-  // ── Event log ─────────────────────────────────────────
+  // ── Event log ─────────────────────────────────────────────
 
   function setFilter(filter, btn) {
     activeFilter = filter;
@@ -665,13 +935,12 @@
     }
 
     const { data: events, error } = await query;
-
     const now = new Date();
     document.getElementById('refresh-label').textContent =
       'Updated ' + now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
     if (error) {
-      container.innerHTML = `<div class="empty-log">Could not load events: ${error.message}</div>`;
+      container.innerHTML = `<div class="empty-log">Could not load events: ${escHtml(error.message)}</div>`;
       return;
     }
 
@@ -691,8 +960,8 @@
         <tr>
           <td style="white-space:nowrap;color:var(--muted)">${time}</td>
           <td><span class="event-type ${type}">${type.replace(/_/g, ' ')}</span></td>
-          <td style="color:var(--gold)">${e.dj_name || '—'}</td>
-          <td class="log-detail">${details}</td>
+          <td style="color:var(--gold)">${escHtml(e.dj_name || '—')}</td>
+          <td class="log-detail">${escHtml(details)}</td>
         </tr>`;
     }).join('');
 
@@ -700,17 +969,14 @@
       <table class="log-table">
         <thead>
           <tr>
-            <th>Time</th>
-            <th>Event</th>
-            <th>DJ</th>
-            <th>Details</th>
+            <th>Time</th><th>Event</th><th>DJ</th><th>Details</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>`;
   }
 
-  // ── Auth ──────────────────────────────────────────────
+  // ── Auth ──────────────────────────────────────────────────
 
   async function logout() {
     clearInterval(refreshTimer);
@@ -718,7 +984,18 @@
     window.location.href = 'index.html';
   }
 
-  // ── Helpers ───────────────────────────────────────────
+  // ── Toast ─────────────────────────────────────────────────
+
+  let toastTimer = null;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────
 
   function formatBytes(bytes) {
     if (!bytes) return '—';
@@ -730,6 +1007,15 @@
   function formatDate(str) {
     if (!str) return '—';
     return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   init();

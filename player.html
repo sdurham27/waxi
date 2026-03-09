@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Waxi — Player</title>
+<meta name="description" content="Listen to DJ sets recorded on Waxi."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #080808;
+    --white: #f0ede6;
+    --gold: #c9a84c;
+    --gold-light: #e2c47a;
+    --groove: #111;
+    --border: #1e1e1e;
+    --muted: #555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.3;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-cta:hover { color: var(--white); border-color: #444; }
+
+  /* Player area */
+  .player-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .dj-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 0.6rem;
+  }
+
+  .track-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    letter-spacing: 0.05em;
+    line-height: 1;
+    text-align: center;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+    max-width: 700px;
+  }
+
+  .track-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 3rem;
+  }
+
+  /* Custom audio player */
+  .audio-card {
+    width: 100%;
+    max-width: 560px;
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem 2rem 1.5rem;
+  }
+
+  .audio-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .big-play-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .big-play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
+  .big-play-btn svg { width: 20px; height: 20px; fill: #080808; margin-left: 3px; }
+  .big-play-btn.playing svg { margin-left: 0; }
+
+  .time-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .time-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar {
+    width: 100%;
+    height: 3px;
+    background: #222;
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 2px;
+    width: 0%;
+    transition: width 0.1s linear;
+  }
+
+  .audio-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.6rem;
+  }
+
+  .dl-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.45rem 1rem;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .dl-btn:hover { color: var(--white); border-color: #444; }
+
+  /* Error state */
+  .error-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+    text-align: center;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .error-icon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 5rem;
+    color: #222;
+    letter-spacing: 0.1em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .error-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    color: #333;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  .error-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* Footer CTA */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .footer-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .footer-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #080808;
+    background: var(--gold);
+    border: none;
+    padding: 0.55rem 1.2rem;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .footer-cta:hover { background: var(--gold-light); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">WAX<span>I</span></a>
+  <a class="nav-cta" href="index.html" id="nav-btn">Log In</a>
+</nav>
+
+<div id="player-area"></div>
+
+<footer>
+  <span class="footer-text">Record your DJ sets automatically on Waxi.</span>
+  <a class="footer-cta" href="index.html">Get Started Free</a>
+</footer>
+
+<script>
+  const SUPABASE_URL = 'https://axhhkmobmvkznmkiplso.supabase.co';
+  const PUBLIC_BASE  = `${SUPABASE_URL}/storage/v1/object/public/recordings`;
+
+  const params  = new URLSearchParams(window.location.search);
+  const dj      = (params.get('dj') || '').trim();
+  const file    = (params.get('file') || '').trim();
+  const area    = document.getElementById('player-area');
+
+  if (!dj || !file) {
+    renderError('Missing Info', 'This link is missing the DJ name or filename.');
+  } else {
+    renderPlayer();
+  }
+
+  // ── Auth: swap Log In → Dashboard if logged in ─────────────
+  (async () => {
+    try {
+      const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+      const sb = createClient(SUPABASE_URL, 'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx');
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        const btn = document.getElementById('nav-btn');
+        btn.textContent = 'Dashboard';
+        btn.href = 'dashboard.html';
+      }
+    } catch (_) {}
+  })();
+
+  // ── Player ──────────────────────────────────────────────────
+
+  function renderPlayer() {
+    const audioUrl   = `${PUBLIC_BASE}/${encodeURIComponent(dj)}/${encodeURIComponent(file)}`;
+    const displayDJ  = dj;
+    const displayName = file.replace('.mp3', '').replace(/_/g, ' ');
+
+    // Try to parse date from filename pattern: djname_YYYY-MM-DD_HH-MM
+    let dateStr = '';
+    const m = file.match(/(\d{4}-\d{2}-\d{2})_(\d{2}-\d{2})/);
+    if (m) {
+      const d = new Date(`${m[1]}T${m[2].replace('-', ':')}:00`);
+      dateStr = d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+
+    area.innerHTML = `
+      <div class="player-wrap">
+        <div class="dj-label">${escHtml(displayDJ)}</div>
+        <div class="track-name">${escHtml(displayName)}</div>
+        ${dateStr ? `<div class="track-meta">${escHtml(dateStr)}</div>` : '<div class="track-meta" style="margin-bottom:3rem"></div>'}
+        <div class="audio-card">
+          <audio id="audio" src="${escHtml(audioUrl)}" preload="metadata"></audio>
+          <div class="audio-controls">
+            <button class="big-play-btn" id="play-btn" onclick="togglePlay()">
+              <svg id="play-icon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+            </button>
+            <div class="time-info">
+              <div class="time-display"><span id="cur-time">0:00</span> / <span id="dur-time">—</span></div>
+              <div class="progress-bar" id="progress-bar" onclick="seek(event)">
+                <div class="progress-fill" id="progress-fill"></div>
+              </div>
+            </div>
+          </div>
+          <div class="audio-actions">
+            <a class="dl-btn" href="${escHtml(audioUrl)}" download="${escHtml(file)}">↓ Download</a>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const audio = document.getElementById('audio');
+    audio.addEventListener('loadedmetadata', () => {
+      document.getElementById('dur-time').textContent = formatTime(audio.duration);
+    });
+    audio.addEventListener('timeupdate', () => {
+      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
+      document.getElementById('progress-fill').style.width = pct + '%';
+      document.getElementById('cur-time').textContent = formatTime(audio.currentTime);
+    });
+    audio.addEventListener('ended', () => {
+      setIcon(false);
+    });
+    audio.addEventListener('error', () => {
+      area.innerHTML = '';
+      renderError('Set Not Found', 'This recording may have been removed or the link is invalid.');
+    });
+  }
+
+  function togglePlay() {
+    const audio = document.getElementById('audio');
+    if (!audio) return;
+    if (audio.paused) { audio.play(); setIcon(true); }
+    else              { audio.pause(); setIcon(false); }
+  }
+
+  function setIcon(playing) {
+    document.getElementById('play-icon').innerHTML = playing
+      ? '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>'
+      : '<path d="M8 5v14l11-7z"/>';
+    document.getElementById('play-btn').classList.toggle('playing', playing);
+  }
+
+  function seek(e) {
+    const audio = document.getElementById('audio');
+    if (!audio || !audio.duration) return;
+    const bar = document.getElementById('progress-bar');
+    const rect = bar.getBoundingClientRect();
+    const pct  = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    audio.currentTime = pct * audio.duration;
+  }
+
+  function renderError(title, sub) {
+    area.innerHTML = `
+      <div class="error-wrap">
+        <div class="error-icon">404</div>
+        <div class="error-title">${escHtml(title)}</div>
+        <div class="error-sub">${escHtml(sub)}</div>
+      </div>`;
+  }
+
+  function formatTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = String(Math.floor(s % 60)).padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function escHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+</script>
+</body>
+</html>
