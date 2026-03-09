@@ -501,9 +501,14 @@
     const djName = currentUser.user_metadata?.dj_name || currentUser.email;
     document.getElementById('nav-dj-name').textContent = djName;
     document.getElementById('page-title').textContent  = djName.toUpperCase() + "'S SETS";
-    if (currentUser.user_metadata?.dj_name === 'saintdizzie') {
-      document.getElementById('admin-link').style.display = '';
-    }
+    // Show admin link only if this user's UUID is in the admin_users table
+    const { data: adminRow } = await sb
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (adminRow) document.getElementById('admin-link').style.display = '';
+
     logEvent('login');
     loadRecordings();
   }

@@ -404,8 +404,6 @@
 <audio id="player"></audio>
 
 <script>
-  const ADMIN_DJ = 'saintdizzie';
-
   const { createClient } = supabase;
   const sb = createClient(
     'https://axhhkmobmvkznmkiplso.supabase.co',
@@ -426,10 +424,17 @@
     const { data: { session } } = await sb.auth.getSession();
     if (!session) { window.location.href = 'index.html'; return; }
 
-    const djName = session.user.user_metadata?.dj_name;
-    if (djName !== ADMIN_DJ) { window.location.href = 'dashboard.html'; return; }
+    // Admin check by user UUID — DJ name alone is not trustworthy
+    const { data: adminRow } = await sb
+      .from('admin_users')
+      .select('user_id')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    if (!adminRow) { window.location.href = 'dashboard.html'; return; }
 
     currentUser = session.user;
+    const djName = session.user.user_metadata?.dj_name || session.user.email;
     document.getElementById('nav-dj-name').textContent = djName;
 
     await Promise.all([loadAllDJs(), loadEventLogs()]);

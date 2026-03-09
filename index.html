@@ -365,6 +365,20 @@
     btn.disabled = true;
     btn.textContent = 'Pressing...';
 
+    // Check DJ name uniqueness before creating account
+    const { data: existing } = await sb
+      .from('dj_profiles')
+      .select('dj_name')
+      .eq('dj_name', name)
+      .maybeSingle();
+
+    if (existing) {
+      msg('signup-msg', 'That DJ name is already taken — try another.', 'error');
+      btn.disabled = false;
+      btn.textContent = 'Get on Waxi';
+      return;
+    }
+
     const { data, error } = await sb.auth.signUp({
       email, password: pass,
       options: { data: { dj_name: name } }
