@@ -92,6 +92,19 @@
   }
   .logout-btn:hover { color: var(--white); border-color: #444; }
 
+  .nav-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--white); }
+
   /* Main */
   main { max-width: 1000px; margin: 0 auto; padding: 3rem 2rem; }
 
@@ -319,7 +332,11 @@
 <body>
 
 <nav>
-  <div class="logo">WAX<span>I</span><span class="admin-badge">ADMIN</span></div>
+  <a class="logo" href="index.html" style="text-decoration:none;color:inherit">WAX<span>I</span><span class="admin-badge">ADMIN</span></a>
+  <div style="display:flex;align-items:center;gap:0.25rem">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="pricing.html" class="nav-link">Pricing</a>
+  </div>
   <div class="nav-right">
     <div class="dj-name" id="nav-dj-name">—</div>
     <button class="logout-btn" onclick="logout()">Log Out</button>

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Waxi — Pricing</title>
+<meta name="description" content="Simple, transparent pricing for DJs. Record, store, and share your sets forever."/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #080808;
+    --white: #f0ede6;
+    --gold: #c9a84c;
+    --gold-light: #e2c47a;
+    --groove: #111;
+    --border: #1e1e1e;
+    --muted: #555;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.3;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+
+  .nav-links { display: flex; align-items: center; gap: 0.25rem; }
+
+  .nav-link {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    transition: color 0.2s;
+  }
+  .nav-link:hover { color: var(--white); }
+  .nav-link.active { color: var(--gold); }
+
+  .nav-cta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .nav-cta:hover { color: var(--white); border-color: #444; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 5rem 2rem 3.5rem;
+    animation: fadeUp 0.5s ease both;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    letter-spacing: 0.05em;
+    line-height: 1;
+  }
+
+  .hero-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-top: 1rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Pricing grid */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2px;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+    animation: fadeUp 0.5s 0.1s ease both;
+  }
+
+  @media (max-width: 700px) {
+    .pricing-grid { grid-template-columns: 1fr; gap: 2px; }
+  }
+
+  .tier-card {
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 2rem 1.8rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    transition: border-color 0.2s;
+  }
+
+  .tier-card:hover { border-color: #2a2a2a; }
+
+  .tier-card.featured {
+    border-color: var(--gold);
+    background: #0f0f0a;
+  }
+
+  .featured-label {
+    position: absolute;
+    top: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    background: var(--gold);
+    color: #080808;
+    padding: 0.2rem 0.8rem;
+    border-radius: 0 0 3px 3px;
+  }
+
+  .tier-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.1em;
+    color: var(--white);
+  }
+
+  .tier-price {
+    margin-top: 0.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .price-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  .price-period {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    margin-left: 0.3rem;
+  }
+
+  .price-free {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3.5rem;
+    line-height: 1;
+    color: var(--muted);
+  }
+
+  .tier-divider {
+    height: 1px;
+    background: var(--border);
+    margin-bottom: 1.5rem;
+  }
+
+  .tier-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    flex: 1;
+    margin-bottom: 2rem;
+  }
+
+  .tier-features li {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+  }
+
+  .tier-features li::before {
+    content: '—';
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .tier-features li.dim::before { color: #333; }
+  .tier-features li.dim { color: #333; }
+
+  .tier-cta {
+    display: block;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.85rem;
+    border-radius: 2px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    border: none;
+  }
+
+  .cta-free {
+    background: none;
+    border: 1px solid #222;
+    color: var(--muted);
+  }
+  .cta-free:hover { border-color: #444; color: var(--white); }
+
+  .cta-paid {
+    background: var(--gold);
+    color: #080808;
+  }
+  .cta-paid:hover { background: var(--gold-light); }
+
+  /* FAQ */
+  .faq {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 0 2rem 6rem;
+    animation: fadeUp 0.5s 0.2s ease both;
+  }
+
+  .faq-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+  }
+
+  .faq-item {
+    border-top: 1px solid var(--border);
+    padding: 1.2rem 0;
+  }
+
+  .faq-q {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--white);
+    margin-bottom: 0.5rem;
+  }
+
+  .faq-a {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.6;
+    letter-spacing: 0.02em;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="index.html">WAX<span>I</span></a>
+  <div class="nav-links">
+    <a class="nav-link active" href="pricing.html">Pricing</a>
+  </div>
+  <div style="display:flex;align-items:center;gap:0.5rem">
+    <a class="nav-cta" href="index.html" id="nav-auth-btn">Log In</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-title">SIMPLE PRICING.<br>SERIOUS STORAGE.</div>
+  <div class="hero-sub">Pick your plan. Start pressing sets.</div>
+</section>
+
+<div class="pricing-grid">
+
+  <!-- FREE -->
+  <div class="tier-card">
+    <div class="tier-name">Free</div>
+    <div class="tier-price">
+      <span class="price-free">Free</span>
+    </div>
+    <div class="tier-divider"></div>
+    <ul class="tier-features">
+      <!-- ✏️  Edit limits below -->
+      <li>[X] recordings</li>
+      <li>[X] GB storage</li>
+      <li>Basic dashboard</li>
+      <li>MP3 playback</li>
+      <li class="dim">Downloads</li>
+      <li class="dim">Priority support</li>
+    </ul>
+    <a class="tier-cta cta-free" href="index.html">Get Started</a>
+  </div>
+
+  <!-- PRO -->
+  <div class="tier-card featured">
+    <div class="featured-label">Most Popular</div>
+    <div class="tier-name">Pro</div>
+    <div class="tier-price">
+      <!-- ✏️  Replace $XX with your price -->
+      <span class="price-amount">$XX</span><span class="price-period">/ mo</span>
+    </div>
+    <div class="tier-divider"></div>
+    <ul class="tier-features">
+      <!-- ✏️  Edit limits below -->
+      <li>Unlimited recordings</li>
+      <li>[X] GB storage</li>
+      <li>Full dashboard</li>
+      <li>MP3 playback + downloads</li>
+      <li class="dim">Priority support</li>
+    </ul>
+    <!-- ✏️  Replace YOUR_PRO_STRIPE_LINK with your Stripe payment link -->
+    <a class="tier-cta cta-paid" href="YOUR_PRO_STRIPE_LINK" target="_blank">Subscribe</a>
+  </div>
+
+  <!-- LABEL -->
+  <div class="tier-card">
+    <div class="tier-name">Label</div>
+    <div class="tier-price">
+      <!-- ✏️  Replace $XX with your price -->
+      <span class="price-amount">$XX</span><span class="price-period">/ mo</span>
+    </div>
+    <div class="tier-divider"></div>
+    <ul class="tier-features">
+      <!-- ✏️  Edit limits below -->
+      <li>Unlimited recordings</li>
+      <li>[X] GB storage</li>
+      <li>Full dashboard</li>
+      <li>MP3 playback + downloads</li>
+      <li>Priority support + early features</li>
+    </ul>
+    <!-- ✏️  Replace YOUR_LABEL_STRIPE_LINK with your Stripe payment link -->
+    <a class="tier-cta cta-paid" href="YOUR_LABEL_STRIPE_LINK" target="_blank">Subscribe</a>
+  </div>
+
+</div>
+
+<div class="faq">
+  <div class="faq-title">Common Questions</div>
+
+  <div class="faq-item">
+    <div class="faq-q">Can I upgrade or downgrade at any time?</div>
+    <div class="faq-a">Yes. Changes take effect at the next billing cycle.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What happens to my recordings if I cancel?</div>
+    <div class="faq-a">Your recordings stay accessible for 30 days after cancellation, giving you time to download them.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">What audio format are recordings stored in?</div>
+    <div class="faq-a">All sets are recorded and stored as 320kbps MP3s — broadcast quality, compact size.</div>
+  </div>
+
+  <div class="faq-item">
+    <div class="faq-q">Do you record automatically?</div>
+    <div class="faq-a">Yes. Once your VRCDN or Twitch stream goes live, Waxi detects it and starts recording automatically. No manual action needed.</div>
+  </div>
+</div>
+
+<script>
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://axhhkmobmvkznmkiplso.supabase.co',
+    'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
+  );
+
+  // Swap "Log In" for "Dashboard" if already logged in
+  async function init() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session) {
+      const btn = document.getElementById('nav-auth-btn');
+      btn.textContent = 'Dashboard';
+      btn.href = 'dashboard.html';
+    }
+  }
+
+  init();
+</script>
+</body>
+</html>
