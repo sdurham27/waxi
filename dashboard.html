@@ -463,6 +463,16 @@
   let currentBtn   = null;
   const player     = document.getElementById('player');
 
+  async function logEvent(type, details = {}) {
+    try {
+      await sb.from('event_logs').insert({
+        event_type: type,
+        dj_name: currentUser?.user_metadata?.dj_name,
+        details
+      });
+    } catch (_) {}
+  }
+
   // Auth check
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
@@ -474,6 +484,7 @@
     const djName = currentUser.user_metadata?.dj_name || currentUser.email;
     document.getElementById('nav-dj-name').textContent = djName;
     document.getElementById('page-title').textContent  = djName.toUpperCase() + "'S SETS";
+    logEvent('login');
     loadRecordings();
   }
 
@@ -540,7 +551,7 @@
           <button class="play-btn" id="${id}" onclick="togglePlay('${url}', '${file.name}', '${id}')">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
-          <a class="download-btn" href="${url}" download="${file.name}">↓ Download</a>
+          <a class="download-btn" href="${url}" download="${file.name}" onclick="logEvent('download',{file:'${file.name}'})">↓ Download</a>
           <button class="delete-btn" onclick="deleteRecording(this)">✕ Delete</button>
         </div>
       `;
@@ -575,6 +586,7 @@
       return;
     }
 
+    logEvent('delete', { file: fileName });
     item.style.transition = 'opacity 0.3s, transform 0.3s';
     item.style.opacity    = '0';
     item.style.transform  = 'translateX(-10px)';
