@@ -252,6 +252,69 @@
 
   a.recording-item:hover .rec-chevron { color: var(--gold); transform: translateX(3px); }
 
+  /* Plan card */
+  .plan-card {
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1.2rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.5s 0.08s ease both;
+  }
+
+  .plan-tier-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .plan-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    color: var(--white);
+    transition: color 0.3s;
+  }
+
+  .plan-name.paid { color: var(--gold); }
+
+  .plan-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.5rem 1rem;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .plan-btn--upgrade {
+    background: var(--gold);
+    color: var(--black);
+    border: 1px solid var(--gold);
+  }
+  .plan-btn--upgrade:hover { background: var(--gold-light); border-color: var(--gold-light); }
+
+  .plan-btn--manage {
+    background: none;
+    color: var(--muted);
+    border: 1px solid #222;
+  }
+  .plan-btn--manage:hover { color: var(--white); border-color: #444; }
+  .plan-btn--manage:disabled { opacity: 0.5; cursor: not-allowed; }
+
   /* Quality selector (Label only) */
   .quality-card {
     background: var(--groove);
@@ -394,6 +457,18 @@
     </div>
   </div>
 
+  <!-- Plan / Subscription card -->
+  <div class="plan-card" id="plan-card" style="display:none">
+    <div>
+      <div class="plan-tier-label">Current Plan</div>
+      <div class="plan-name" id="plan-tier-display">FREE</div>
+    </div>
+    <div style="display:flex;gap:0.5rem;align-items:center">
+      <a href="pricing.html" class="plan-btn plan-btn--upgrade" id="btn-upgrade">Upgrade →</a>
+      <button class="plan-btn plan-btn--manage" id="btn-manage" onclick="manageSubscription()" style="display:none">Manage Subscription</button>
+    </div>
+  </div>
+
   <!-- Quality selector — Label tier only -->
   <div class="quality-card" id="quality-card" style="display:none">
     <div>
@@ -460,13 +535,26 @@
       .maybeSingle();
     if (adminRow) document.getElementById('admin-link').style.display = '';
 
-    // Fetch tier + quality
+    // Fetch tier, quality, and stripe customer id
     const { data: profile } = await sb
       .from('dj_profiles')
-      .select('tier, audio_quality')
+      .select('tier, audio_quality, stripe_customer_id')
       .eq('id', currentUser.id)
       .maybeSingle();
     userTier = profile?.tier || 'free';
+
+    // Plan card
+    const planCard       = document.getElementById('plan-card');
+    const planDisplay    = document.getElementById('plan-tier-display');
+    const btnUpgrade     = document.getElementById('btn-upgrade');
+    const btnManage      = document.getElementById('btn-manage');
+    planDisplay.textContent = userTier.toUpperCase();
+    if (userTier === 'pro' || userTier === 'label') {
+      planDisplay.classList.add('paid');
+      btnUpgrade.style.display = 'none';
+      btnManage.style.display  = '';
+    }
+    planCard.style.display = '';
 
     // Show quality selector for Label users
     if (userTier === 'label') {
@@ -478,6 +566,39 @@
 
     logEvent('login');
     loadRecordings();
+  }
+
+  async function manageSubscription() {
+    const btn = document.getElementById('btn-manage');
+    btn.textContent = 'Loading…';
+    btn.disabled = true;
+
+    try {
+      const { data: { session } } = await sb.auth.getSession();
+      const res = await fetch(
+        'https://axhhkmobmvkznmkiplso.supabase.co/functions/v1/create-portal-session',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({ returnUrl: window.location.href }),
+        }
+      );
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        showToast('Could not open portal: ' + (data.error || 'unknown error'));
+        btn.textContent = 'Manage Subscription';
+        btn.disabled = false;
+      }
+    } catch (err) {
+      showToast('Something went wrong. Try again.');
+      btn.textContent = 'Manage Subscription';
+      btn.disabled = false;
+    }
   }
 
   async function saveQuality(value) {
