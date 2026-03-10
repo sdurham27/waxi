@@ -504,6 +504,7 @@
   let currentUser = null;
   let currentAudio = null;
   let currentBtn   = null;
+  let userTier     = 'free';
   const player     = document.getElementById('player');
 
   async function logEvent(type, details = {}) {
@@ -534,6 +535,14 @@
       .eq('user_id', currentUser.id)
       .maybeSingle();
     if (adminRow) document.getElementById('admin-link').style.display = '';
+
+    // Fetch tier
+    const { data: profile } = await sb
+      .from('dj_profiles')
+      .select('tier')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    userTier = profile?.tier || 'free';
 
     logEvent('login');
     loadRecordings();
@@ -593,6 +602,10 @@
       item.dataset.size     = file.metadata?.size || 0;
       item.dataset.djname   = djName;
       item.dataset.filename = file.name;
+      const downloadHtml = userTier === 'free'
+        ? `<button class="download-btn" disabled style="opacity:0.3;cursor:not-allowed" title="Upgrade to Pro to download">↓ Download</button>`
+        : `<a class="download-btn" href="${url}" download="${file.name}" onclick="logEvent('download',{file:'${file.name}'})">↓ Download</a>`;
+
       item.innerHTML = `
         <div>
           <div class="recording-name">${file.name.replace('.mp3', '')}</div>
@@ -602,7 +615,7 @@
           <button class="play-btn" id="${id}" onclick="togglePlay('${url}', '${file.name}', '${id}')">
             <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           </button>
-          <a class="download-btn" href="${url}" download="${file.name}" onclick="logEvent('download',{file:'${file.name}'})">↓ Download</a>
+          ${downloadHtml}
           <button class="share-btn" onclick="shareRecording(this, '${djName}', '${file.name}')">⬡ Share</button>
           <button class="delete-btn" onclick="deleteRecording(this)">✕ Delete</button>
         </div>
@@ -722,6 +735,21 @@
     currentAudio = null;
     currentBtn   = null;
   });
+
+  // 2-minute preview limit for free tier
+  player.addEventListener('timeupdate', () => {
+    if (userTier === 'free' && player.currentTime >= 120) {
+      stopAudio();
+      showUpgradeToast();
+    }
+  });
+
+  function showUpgradeToast() {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = 'Free preview ends at 2 min &nbsp;·&nbsp; <a href="pricing.html" style="color:var(--gold);text-decoration:none">Upgrade to listen in full →</a>';
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 6000);
+  }
 
   async function logout() {
     await sb.auth.signOut();
