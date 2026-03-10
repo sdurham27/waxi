@@ -301,6 +301,175 @@
     line-height: 1.6;
     letter-spacing: 0.02em;
   }
+
+  /* ── Platform Modal ──────────────────────────────────── */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    backdrop-filter: blur(4px);
+    animation: fadeIn 0.15s ease both;
+  }
+  .modal-overlay.open { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  .modal {
+    background: #0f0f0f;
+    border: 1px solid #2a2a2a;
+    border-radius: 4px;
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 460px;
+    position: relative;
+    animation: slideUp 0.2s ease both;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(16px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.2rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0.2rem 0.4rem;
+    transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--white); }
+
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    margin-bottom: 0.4rem;
+  }
+
+  .modal-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.8rem;
+  }
+
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .platform-btn {
+    background: #111;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.9rem 1rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .platform-btn:hover { border-color: #444; background: #161616; }
+  .platform-btn.selected { border-color: var(--gold); background: #141208; }
+
+  .platform-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--white);
+  }
+
+  .platform-other-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Unsupported capture form */
+  .unsupported-form {
+    display: none;
+    flex-direction: column;
+    gap: 0.9rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.2rem;
+  }
+  .unsupported-form.visible { display: flex; }
+
+  .modal-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+    display: block;
+  }
+
+  .modal-input {
+    width: 100%;
+    background: #080808;
+    border: 1px solid #2a2a2a;
+    color: var(--white);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .modal-input:focus { border-color: var(--gold); }
+  .modal-input::placeholder { color: #333; }
+
+  .modal-msg {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    text-align: center;
+    min-height: 1em;
+    letter-spacing: 0.05em;
+  }
+  .modal-msg.error   { color: #ff6b6b; }
+  .modal-msg.success { color: #6bffb8; }
+
+  .modal-action {
+    width: 100%;
+    padding: 0.85rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+  }
+  .modal-action.primary { background: var(--gold); color: #080808; }
+  .modal-action.primary:hover { background: var(--gold-light); }
+  .modal-action.primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .modal-action.ghost { background: none; border: 1px solid #333; color: var(--muted); }
+  .modal-action.ghost:hover { border-color: #555; color: var(--white); }
 </style>
 </head>
 <body>
@@ -358,8 +527,7 @@
       <li>MP3 playback + downloads</li>
       <li class="dim">Priority support</li>
     </ul>
-    <!-- ✏️  Replace YOUR_PRO_STRIPE_LINK with your Stripe payment link -->
-    <a class="tier-cta cta-paid" href="YOUR_PRO_STRIPE_LINK" target="_blank">Subscribe</a>
+    <button class="tier-cta cta-paid" onclick="selectPlatform('pro')">Subscribe</button>
   </div>
 
   <!-- LABEL -->
@@ -378,8 +546,7 @@
       <li>MP3 playback + downloads</li>
       <li>Priority support + early features</li>
     </ul>
-    <!-- ✏️  Replace YOUR_LABEL_STRIPE_LINK with your Stripe payment link -->
-    <a class="tier-cta cta-paid" href="YOUR_LABEL_STRIPE_LINK" target="_blank">Subscribe</a>
+    <button class="tier-cta cta-paid" onclick="selectPlatform('label')">Subscribe</button>
   </div>
 
 </div>
@@ -404,7 +571,67 @@
 
   <div class="faq-item">
     <div class="faq-q">Do you record automatically?</div>
-    <div class="faq-a">Yes. Once your VRCDN or Twitch stream goes live, Waxi detects it and starts recording automatically. No manual action needed.</div>
+    <div class="faq-a">Yes. Once your Twitch, YouTube, Kick, or VRCDN stream goes live, Waxi detects it and starts recording automatically. No manual action needed.</div>
+  </div>
+</div>
+
+<!-- Platform Selection Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <!-- Step 1: Pick platform -->
+    <div id="step-platform">
+      <div class="modal-title">PICK YOUR PLATFORM</div>
+      <div class="modal-sub">What service do you stream on?</div>
+
+      <div class="platform-grid">
+        <button class="platform-btn" onclick="choosePlatform('twitch')">
+          <span class="platform-name">Twitch</span>
+        </button>
+        <button class="platform-btn" onclick="choosePlatform('youtube')">
+          <span class="platform-name">YouTube</span>
+        </button>
+        <button class="platform-btn" onclick="choosePlatform('kick')">
+          <span class="platform-name">Kick</span>
+        </button>
+        <button class="platform-btn" onclick="choosePlatform('vrcdn')">
+          <span class="platform-name">VRCDN</span>
+        </button>
+        <button class="platform-btn" onclick="choosePlatform('other')" style="grid-column: span 2;">
+          <span class="platform-other-name">Other / Not listed</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Step 2a: Supported → go to Stripe -->
+    <div id="step-supported" style="display:none">
+      <div class="modal-title">YOU'RE GOOD TO GO</div>
+      <div class="modal-sub" id="supported-sub">Waxi supports your platform.</div>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#888;margin:1rem 0 1.5rem;line-height:1.6">
+        You'll be taken to Stripe to complete your subscription. Come back here after and you're all set.
+      </p>
+      <a class="modal-action primary" id="stripe-link" href="#" target="_blank" onclick="closeModal()">Continue to Checkout →</a>
+    </div>
+
+    <!-- Step 2b: Unsupported → capture info -->
+    <div id="step-unsupported" style="display:none">
+      <div class="modal-title">NOT YET SUPPORTED</div>
+      <div class="modal-sub">But we want to add it.</div>
+      <p style="font-family:'DM Sans',sans-serif;font-size:0.9rem;color:#888;margin:1rem 0 1.2rem;line-height:1.6">
+        We're actively expanding platform support. Tell us what you use and we'll notify you the moment it's live.
+      </p>
+      <div>
+        <label class="modal-label">Your streaming platform</label>
+        <input class="modal-input" type="text" id="platform-name-input" placeholder="e.g. Mixcloud Live, Beatport, etc."/>
+      </div>
+      <div>
+        <label class="modal-label">Your email</label>
+        <input class="modal-input" type="email" id="platform-email-input" placeholder="you@example.com"/>
+      </div>
+      <div class="modal-msg" id="unsupported-msg"></div>
+      <button class="modal-action primary" id="notify-btn" onclick="submitPlatformRequest()">Notify Me When It's Ready</button>
+    </div>
   </div>
 </div>
 
@@ -415,6 +642,16 @@
     'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
   );
 
+  // ✏️  Replace these with your real Stripe Payment Link URLs once approved
+  const STRIPE_LINKS = {
+    pro:   'https://buy.stripe.com/7sY14neOc8s71FqgHX9R600',
+    label: 'https://buy.stripe.com/6oU3cv6hG0ZFabW63j9R601',
+  };
+
+  const SUPPORTED = ['twitch', 'youtube', 'kick', 'vrcdn'];
+
+  let currentTier = null;
+
   // Swap "Log In" for "Dashboard" if already logged in
   async function init() {
     const { data: { session } } = await sb.auth.getSession();
@@ -424,6 +661,91 @@
       btn.href = 'dashboard.html';
     }
   }
+
+  function selectPlatform(tier) {
+    currentTier = tier;
+    // Reset to step 1
+    document.getElementById('step-platform').style.display = '';
+    document.getElementById('step-supported').style.display = 'none';
+    document.getElementById('step-unsupported').style.display = 'none';
+    document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('modal-overlay').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+  }
+
+  function choosePlatform(platform) {
+    document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+
+    // Short delay for visual feedback, then advance
+    setTimeout(() => {
+      if (SUPPORTED.includes(platform)) {
+        showSupported(platform);
+      } else {
+        showUnsupported();
+      }
+    }, 180);
+  }
+
+  function showSupported(platform) {
+    const label = { twitch: 'Twitch', youtube: 'YouTube', kick: 'Kick', vrcdn: 'VRCDN' }[platform];
+    document.getElementById('supported-sub').textContent = `Waxi supports ${label}. `;
+    document.getElementById('stripe-link').href = STRIPE_LINKS[currentTier];
+    document.getElementById('step-platform').style.display = 'none';
+    document.getElementById('step-supported').style.display = '';
+  }
+
+  function showUnsupported() {
+    document.getElementById('platform-name-input').value = '';
+    document.getElementById('platform-email-input').value = '';
+    document.getElementById('unsupported-msg').textContent = '';
+    document.getElementById('unsupported-msg').className = 'modal-msg';
+    document.getElementById('notify-btn').disabled = false;
+    document.getElementById('notify-btn').textContent = 'Notify Me When It\'s Ready';
+    document.getElementById('step-platform').style.display = 'none';
+    document.getElementById('step-unsupported').style.display = '';
+  }
+
+  async function submitPlatformRequest() {
+    const platform = document.getElementById('platform-name-input').value.trim();
+    const email    = document.getElementById('platform-email-input').value.trim();
+    const msgEl    = document.getElementById('unsupported-msg');
+    const btn      = document.getElementById('notify-btn');
+
+    if (!platform || !email) {
+      msgEl.textContent = 'Please fill in both fields.';
+      msgEl.className = 'modal-msg error';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Saving...';
+
+    const { error } = await sb.from('event_logs').insert({
+      event_type: 'platform_request',
+      dj_name: null,
+      details: { platform, email, tier: currentTier },
+    });
+
+    if (error) {
+      msgEl.textContent = 'Something went wrong — try again.';
+      msgEl.className = 'modal-msg error';
+      btn.disabled = false;
+      btn.textContent = 'Notify Me When It\'s Ready';
+    } else {
+      msgEl.textContent = 'Got it! We\'ll email you when ' + platform + ' is supported.';
+      msgEl.className = 'modal-msg success';
+      btn.textContent = '✓ Submitted';
+    }
+  }
+
+  // Close on Escape
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeModal();
+  });
 
   init();
 </script>
