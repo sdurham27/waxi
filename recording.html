@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Waxi — Recording</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --black: #080808;
+    --white: #f0ede6;
+    --gold: #c9a84c;
+    --gold-light: #e2c47a;
+    --groove: #111;
+    --border: #1e1e1e;
+    --muted: #555;
+    --red: #c0392b;
+    --red-light: #e74c3c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.3;
+  }
+
+  /* Nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 2.5rem;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: rgba(8,8,8,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 50;
+  }
+
+  .back-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    transition: color 0.2s;
+  }
+  .back-btn:hover { color: var(--white); }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2rem;
+    letter-spacing: 0.08em;
+    color: var(--white);
+    text-decoration: none;
+  }
+  .logo span { color: var(--gold); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .dj-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .logout-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: none;
+    border: 1px solid #222;
+    padding: 0.4rem 0.9rem;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .logout-btn:hover { color: var(--white); border-color: #444; }
+
+  /* Main */
+  main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 4rem 2rem 6rem;
+  }
+
+  /* Loading */
+  .loading {
+    text-align: center;
+    padding: 5rem 2rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+  .spinner {
+    width: 24px; height: 24px;
+    border: 2px solid #222;
+    border-top-color: var(--gold);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 1rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Recording header */
+  .rec-header {
+    margin-bottom: 3rem;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .rec-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    letter-spacing: 0.05em;
+    line-height: 1.1;
+    color: var(--white);
+    word-break: break-word;
+  }
+
+  .rec-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-top: 0.6rem;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Player section */
+  .player-section {
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2rem;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s 0.05s ease both;
+  }
+
+  /* Free preview badge */
+  .preview-notice {
+    display: none;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid #3a2e10;
+    background: #1a1508;
+    border-radius: 2px;
+    padding: 0.4rem 0.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  .preview-notice.visible { display: block; }
+
+  /* Controls row */
+  .controls-row {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+  }
+
+  .play-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
+  .play-btn svg { width: 20px; height: 20px; fill: #080808; margin-left: 3px; }
+  .play-btn.playing svg { margin-left: 0; }
+
+  /* Seek + time */
+  .seek-wrap { flex: 1; min-width: 0; }
+
+  .seek-bar {
+    width: 100%;
+    -webkit-appearance: none;
+    appearance: none;
+    height: 3px;
+    background: #2a2a2a;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+  }
+  .seek-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--gold);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .seek-bar::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  /* Gradient fill on seek bar */
+  .seek-bar {
+    background: linear-gradient(
+      to right,
+      var(--gold) 0%,
+      var(--gold) var(--pct, 0%),
+      #2a2a2a var(--pct, 0%),
+      #2a2a2a 100%
+    );
+  }
+
+  .time-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+  }
+  .time-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .time-limit {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: #555;
+    letter-spacing: 0.05em;
+  }
+
+  /* Actions */
+  .actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.4s 0.1s ease both;
+  }
+
+  .action-btn {
+    flex: 1;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.85rem;
+    border-radius: 2px;
+    border: 1px solid #222;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    display: block;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .action-btn:hover:not([disabled]) { color: var(--white); border-color: #444; }
+  .action-btn[disabled] { opacity: 0.28; cursor: not-allowed; }
+
+  /* Danger zone */
+  .danger-zone {
+    margin-top: 5rem;
+    padding-top: 2rem;
+    border-top: 1px solid #1a1a1a;
+    animation: fadeUp 0.4s 0.15s ease both;
+  }
+
+  .danger-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #333;
+    margin-bottom: 1rem;
+  }
+
+  .delete-btn {
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.9rem;
+    border-radius: 2px;
+    border: 1px solid #3a1010;
+    background: none;
+    color: var(--red);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+  .delete-btn:hover:not(:disabled) { background: var(--red); color: var(--white); border-color: var(--red); }
+  .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    background: #1a1a1a; border: 1px solid #333; border-radius: 3px;
+    font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--white);
+    padding: 0.65rem 1.2rem; opacity: 0; transition: opacity 0.2s;
+    pointer-events: none; z-index: 200; white-space: nowrap;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="back-btn" href="dashboard.html">← Dashboard</a>
+  <a class="logo" href="dashboard.html">WAX<span>I</span></a>
+  <div class="nav-right">
+    <div class="dj-name" id="nav-dj-name">—</div>
+    <button class="logout-btn" onclick="logout()">Log Out</button>
+  </div>
+</nav>
+
+<main>
+  <div id="loading-state" class="loading">
+    <div class="spinner"></div>
+    Loading recording...
+  </div>
+
+  <div id="rec-content" style="display:none">
+    <div class="rec-header">
+      <h1 class="rec-title" id="rec-title">—</h1>
+      <div class="rec-meta" id="rec-meta">—</div>
+    </div>
+
+    <div class="player-section">
+      <div class="preview-notice" id="preview-notice">
+        Free plan · 2-minute preview — <a href="pricing.html" style="color:var(--gold);text-decoration:none">Upgrade to listen in full</a>
+      </div>
+      <div class="controls-row">
+        <button class="play-btn" id="play-btn" onclick="togglePlay()">
+          <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+        <div class="seek-wrap">
+          <input class="seek-bar" id="seek-bar" type="range" min="0" value="0" step="0.1"/>
+          <div class="time-row">
+            <span class="time-val" id="time-current">0:00</span>
+            <span class="time-limit" id="time-limit"></span>
+            <span class="time-val" id="time-total">—</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="action-btn" id="download-btn" onclick="downloadRecording()">↓ Download</button>
+      <button class="action-btn" onclick="shareRecording()">⬡ Share</button>
+    </div>
+
+    <div class="danger-zone">
+      <div class="danger-label">Danger Zone</div>
+      <button class="delete-btn" id="delete-btn" onclick="deleteRecording()">Delete Recording</button>
+    </div>
+  </div>
+</main>
+
+<audio id="player"></audio>
+<div id="toast"></div>
+
+<script>
+  const { createClient } = supabase;
+  const sb = createClient(
+    'https://axhhkmobmvkznmkiplso.supabase.co',
+    'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
+  );
+
+  const params   = new URLSearchParams(location.search);
+  const djParam  = params.get('dj');
+  const fileParam = params.get('file');
+
+  let signedUrl  = null;
+  let userTier   = 'free';
+  let isDragging = false;
+  const player   = document.getElementById('player');
+
+  async function init() {
+    if (!djParam || !fileParam) {
+      showError('Missing recording info. <a href="dashboard.html">← Back to dashboard</a>');
+      return;
+    }
+
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) { window.location.href = 'index.html'; return; }
+
+    const user   = session.user;
+    const djName = user.user_metadata?.dj_name || user.email.split('@')[0];
+
+    document.getElementById('nav-dj-name').textContent = djName;
+
+    // Security: only allow viewing your own recordings
+    if (djParam !== djName) {
+      showError('Recording not found. <a href="dashboard.html">← Back to dashboard</a>');
+      return;
+    }
+
+    // Get tier
+    const { data: profile } = await sb
+      .from('dj_profiles')
+      .select('tier')
+      .eq('id', user.id)
+      .maybeSingle();
+    userTier = profile?.tier || 'free';
+
+    // Get signed URL
+    const { data: urlData, error } = await sb.storage
+      .from('recordings')
+      .createSignedUrl(`${djName}/${fileParam}`, 3600);
+
+    if (error || !urlData?.signedUrl) {
+      showError('Could not load this recording. It may have been deleted. <a href="dashboard.html">← Back to dashboard</a>');
+      return;
+    }
+
+    signedUrl = urlData.signedUrl;
+
+    // Metadata from storage
+    const { data: files } = await sb.storage
+      .from('recordings')
+      .list(djName, { search: fileParam });
+
+    const file = files?.find(f => f.name === fileParam);
+    const size = file ? formatBytes(file.metadata?.size || 0) : '—';
+    const date = file ? formatDate(file.created_at) : '—';
+
+    document.title = `Waxi — ${fileParam.replace('.mp3', '')}`;
+    document.getElementById('rec-title').textContent = fileParam.replace('.mp3', '');
+    document.getElementById('rec-meta').textContent  = `${date} · ${size}`;
+
+    // Free tier: show preview notice, disable download
+    if (userTier === 'free') {
+      document.getElementById('preview-notice').classList.add('visible');
+      const dlBtn = document.getElementById('download-btn');
+      dlBtn.disabled = true;
+      dlBtn.title = 'Upgrade to Pro to download';
+    }
+
+    // Wire up player
+    player.src = signedUrl;
+    wirePlayer();
+
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('rec-content').style.display   = '';
+  }
+
+  // ── Player ──────────────────────────────────────────────
+
+  function wirePlayer() {
+    const seekBar = document.getElementById('seek-bar');
+
+    player.addEventListener('loadedmetadata', () => {
+      const max = userTier === 'free' ? Math.min(120, player.duration) : player.duration;
+      seekBar.max = max;
+      document.getElementById('time-total').textContent = formatTime(player.duration);
+      if (userTier === 'free') {
+        document.getElementById('time-limit').textContent = '2:00 limit';
+      }
+    });
+
+    player.addEventListener('timeupdate', () => {
+      if (isDragging) return;
+      const t = player.currentTime;
+
+      // Free 2-min cutoff
+      if (userTier === 'free' && t >= 120) {
+        player.pause();
+        player.currentTime = 120;
+        setPlayIcon(false);
+        showToast('Free preview ends at 2:00 · <a href="pricing.html" style="color:var(--gold);text-decoration:none">Upgrade to listen in full →</a>');
+        return;
+      }
+
+      const pct = player.duration ? (t / player.duration) * 100 : 0;
+      seekBar.value = t;
+      seekBar.style.setProperty('--pct', pct + '%');
+      document.getElementById('time-current').textContent = formatTime(t);
+    });
+
+    player.addEventListener('ended', () => setPlayIcon(false));
+
+    seekBar.addEventListener('mousedown', () => { isDragging = true; });
+    seekBar.addEventListener('touchstart', () => { isDragging = true; });
+
+    seekBar.addEventListener('input', () => {
+      const val = parseFloat(seekBar.value);
+      const pct = player.duration ? (val / player.duration) * 100 : 0;
+      seekBar.style.setProperty('--pct', pct + '%');
+      document.getElementById('time-current').textContent = formatTime(val);
+    });
+
+    seekBar.addEventListener('change', () => {
+      const val = parseFloat(seekBar.value);
+      // Clamp to 2-min for free
+      const target = userTier === 'free' ? Math.min(val, 119.9) : val;
+      player.currentTime = target;
+      isDragging = false;
+    });
+
+    seekBar.addEventListener('mouseup',  () => { isDragging = false; });
+    seekBar.addEventListener('touchend', () => { isDragging = false; });
+  }
+
+  function togglePlay() {
+    if (player.paused) {
+      player.play();
+      setPlayIcon(true);
+    } else {
+      player.pause();
+      setPlayIcon(false);
+    }
+  }
+
+  function setPlayIcon(playing) {
+    const btn = document.getElementById('play-btn');
+    btn.innerHTML = playing
+      ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
+      : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
+    btn.classList.toggle('playing', playing);
+  }
+
+  // ── Actions ─────────────────────────────────────────────
+
+  function downloadRecording() {
+    if (!signedUrl) return;
+    const a = document.createElement('a');
+    a.href = signedUrl;
+    a.download = fileParam;
+    a.click();
+  }
+
+  function shareRecording() {
+    const shareUrl = `https://waxi-theta.vercel.app/player.html?dj=${encodeURIComponent(djParam)}&file=${encodeURIComponent(fileParam)}`;
+    navigator.clipboard.writeText(shareUrl).then(() => {
+      showToast('Share link copied to clipboard!');
+    }).catch(() => {
+      prompt('Copy this link:', shareUrl);
+    });
+  }
+
+  async function deleteRecording() {
+    const displayName = fileParam.replace('.mp3', '');
+    if (!confirm(`Delete "${displayName}"?\n\nThis cannot be undone.`)) return;
+
+    const btn = document.getElementById('delete-btn');
+    btn.disabled    = true;
+    btn.textContent = 'Deleting...';
+
+    player.pause();
+    player.src = '';
+
+    const { error } = await sb.storage
+      .from('recordings')
+      .remove([`${djParam}/${fileParam}`]);
+
+    if (error) {
+      btn.disabled    = false;
+      btn.textContent = 'Delete Recording';
+      showToast('Delete failed: ' + error.message);
+      return;
+    }
+
+    showToast('Recording deleted.');
+    setTimeout(() => { window.location.href = 'dashboard.html'; }, 1200);
+  }
+
+  // ── Helpers ─────────────────────────────────────────────
+
+  function showError(html) {
+    const el = document.getElementById('loading-state');
+    el.innerHTML = `<div style="color:#555;line-height:1.8">${html}</div>`;
+  }
+
+  function showToast(html) {
+    const toast = document.getElementById('toast');
+    toast.innerHTML = html;
+    toast.classList.add('show');
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 5000);
+  }
+
+  function formatTime(s) {
+    if (!s || isNaN(s)) return '0:00';
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  }
+
+  function formatBytes(bytes) {
+    if (!bytes) return '—';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function formatDate(str) {
+    if (!str) return '—';
+    return new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+
+  async function logout() {
+    player.pause();
+    await sb.auth.signOut();
+    window.location.href = 'index.html';
+  }
+
+  init();
+</script>
+</body>
+</html>

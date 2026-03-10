@@ -201,8 +201,6 @@
     border: 1px solid var(--border);
     border-radius: 3px;
     padding: 1rem 1.5rem;
-    display: grid;
-    grid-template-columns: 1fr auto auto;
     align-items: center;
     gap: 1.5rem;
     transition: border-color 0.2s, background 0.2s;
@@ -236,141 +234,69 @@
     white-space: nowrap;
   }
 
-  /* Audio player */
-  .player-wrap {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .play-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: var(--gold);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.2s, transform 0.1s;
-  }
-
-  .play-btn:hover { background: var(--gold-light); transform: scale(1.05); }
-  .play-btn svg { width: 14px; height: 14px; fill: #080808; margin-left: 2px; }
-  .play-btn.playing svg { margin-left: 0; }
-
-  .download-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    background: none;
-    border: 1px solid #222;
-    padding: 0.35rem 0.7rem;
-    border-radius: 2px;
-    cursor: pointer;
+  /* Recording link */
+  a.recording-item {
     text-decoration: none;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
+    color: inherit;
+    display: grid;
+    grid-template-columns: 1fr auto;
   }
 
-  .download-btn:hover { color: var(--white); border-color: #444; }
-
-  .delete-btn {
+  .rec-chevron {
     font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    background: none;
-    border: 1px solid #222;
-    padding: 0.35rem 0.7rem;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
+    font-size: 0.9rem;
+    color: #333;
+    align-self: center;
+    transition: color 0.2s, transform 0.2s;
   }
 
-  .delete-btn:hover:not(:disabled) { color: #e05555; border-color: #5a2020; }
-  .delete-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  a.recording-item:hover .rec-chevron { color: var(--gold); transform: translateX(3px); }
 
-  .share-btn {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    background: none;
-    border: 1px solid #222;
-    padding: 0.35rem 0.7rem;
-    border-radius: 2px;
-    cursor: pointer;
-    transition: color 0.2s, border-color 0.2s;
-    white-space: nowrap;
-  }
-  .share-btn:hover { color: var(--white); border-color: #444; }
-
-  /* Now playing bar */
-  #now-playing {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #0d0d0d;
-    border-top: 1px solid var(--border);
-    padding: 1rem 2.5rem;
-    display: none;
-    align-items: center;
-    gap: 1.5rem;
-    z-index: 50;
-    animation: slideUp 0.3s ease;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to   { transform: translateY(0); }
-  }
-
-  #now-playing.visible { display: flex; }
-
-  .np-info { flex: 1; min-width: 0; }
-
-  .np-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--gold);
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-
-  .np-name {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    color: var(--white);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .np-controls {
+  /* Quality selector (Label only) */
+  .quality-card {
+    background: var(--groove);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1.2rem 1.5rem;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.5s 0.1s ease both;
   }
 
-  .stop-btn {
+  .quality-label {
     font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
     color: var(--muted);
-    background: none;
-    border: none;
-    cursor: pointer;
-    transition: color 0.2s;
   }
 
-  .stop-btn:hover { color: var(--white); }
+  .quality-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: #333;
+    margin-top: 0.25rem;
+  }
 
-  audio#player { display: none; }
+  .quality-select {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    background: #080808;
+    color: var(--white);
+    border: 1px solid #2a2a2a;
+    padding: 0.5rem 0.8rem;
+    border-radius: 2px;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+    flex-shrink: 0;
+  }
+  .quality-select:focus { border-color: var(--gold); }
 
   /* Empty state */
   .empty {
@@ -468,6 +394,19 @@
     </div>
   </div>
 
+  <!-- Quality selector — Label tier only -->
+  <div class="quality-card" id="quality-card" style="display:none">
+    <div>
+      <div class="quality-label">Recording Quality</div>
+      <div class="quality-sub">Applied to future recordings · highest quality depends on source</div>
+    </div>
+    <select class="quality-select" id="quality-select" onchange="saveQuality(this.value)">
+      <option value="128k">128 kbps — Smaller files</option>
+      <option value="192k">192 kbps — Balanced</option>
+      <option value="320k" selected>320 kbps — Highest quality</option>
+    </select>
+  </div>
+
   <div class="recordings-header">
     <div class="section-title">Recordings</div>
   </div>
@@ -480,18 +419,6 @@
   </div>
 </main>
 
-<!-- Now playing bar -->
-<div id="now-playing">
-  <div class="np-info">
-    <div class="np-label">▶ Now Playing</div>
-    <div class="np-name" id="np-name">—</div>
-  </div>
-  <div class="np-controls">
-    <button class="stop-btn" onclick="stopAudio()">◼ Stop</button>
-  </div>
-</div>
-
-<audio id="player"></audio>
 <div id="toast"></div>
 
 <script>
@@ -502,10 +429,7 @@
   );
 
   let currentUser = null;
-  let currentAudio = null;
-  let currentBtn   = null;
-  let userTier     = 'free';
-  const player     = document.getElementById('player');
+  let userTier    = 'free';
 
   async function logEvent(type, details = {}) {
     try {
@@ -536,16 +460,31 @@
       .maybeSingle();
     if (adminRow) document.getElementById('admin-link').style.display = '';
 
-    // Fetch tier
+    // Fetch tier + quality
     const { data: profile } = await sb
       .from('dj_profiles')
-      .select('tier')
+      .select('tier, audio_quality')
       .eq('id', currentUser.id)
       .maybeSingle();
     userTier = profile?.tier || 'free';
 
+    // Show quality selector for Label users
+    if (userTier === 'label') {
+      const card = document.getElementById('quality-card');
+      const sel  = document.getElementById('quality-select');
+      card.style.display = '';
+      sel.value = profile?.audio_quality || '320k';
+    }
+
     logEvent('login');
     loadRecordings();
+  }
+
+  async function saveQuality(value) {
+    await sb.from('dj_profiles')
+      .update({ audio_quality: value })
+      .eq('id', currentUser.id);
+    showToast('Quality updated to ' + value);
   }
 
   async function loadRecordings() {
@@ -588,37 +527,19 @@
     list.className = 'recordings-list';
 
     for (const file of mp3s) {
-      const { data: urlData } = await sb.storage
-        .from('recordings')
-        .createSignedUrl(`${djName}/${file.name}`, 3600);
-
-      const url  = urlData?.signedUrl;
       const size = formatBytes(file.metadata?.size || 0);
       const date = formatDate(file.created_at);
-      const id   = 'rec-' + Math.random().toString(36).slice(2);
+      const href = `recording.html?dj=${encodeURIComponent(djName)}&file=${encodeURIComponent(file.name)}`;
 
-      const item = document.createElement('div');
+      const item = document.createElement('a');
       item.className = 'recording-item';
-      item.dataset.size     = file.metadata?.size || 0;
-      item.dataset.djname   = djName;
-      item.dataset.filename = file.name;
-      const downloadHtml = userTier === 'free'
-        ? `<button class="download-btn" disabled style="opacity:0.3;cursor:not-allowed" title="Upgrade to Pro to download">↓ Download</button>`
-        : `<a class="download-btn" href="${url}" download="${file.name}" onclick="logEvent('download',{file:'${file.name}'})">↓ Download</a>`;
-
+      item.href = href;
       item.innerHTML = `
         <div>
           <div class="recording-name">${file.name.replace('.mp3', '')}</div>
           <div class="recording-meta">${date} · ${size}</div>
         </div>
-        <div class="player-wrap">
-          <button class="play-btn" id="${id}" onclick="togglePlay('${url}', '${file.name}', '${id}')">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-          </button>
-          ${downloadHtml}
-          <button class="share-btn" onclick="shareRecording(this, '${djName}', '${file.name}')">⬡ Share</button>
-          <button class="delete-btn" onclick="deleteRecording(this)">✕ Delete</button>
-        </div>
+        <div class="rec-chevron">→</div>
       `;
       list.appendChild(item);
     }
@@ -626,129 +547,12 @@
     container.appendChild(list);
   }
 
-  function shareRecording(btn, djName, fileName) {
-    const shareUrl = `https://waxi-theta.vercel.app/player.html?dj=${encodeURIComponent(djName)}&file=${encodeURIComponent(fileName)}`;
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      const orig = btn.textContent;
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => { btn.textContent = orig; }, 2000);
-    }).catch(() => {
-      prompt('Copy this link:', shareUrl);
-    });
-  }
-
-  async function deleteRecording(btn) {
-    const item     = btn.closest('.recording-item');
-    const djName   = item.dataset.djname;
-    const fileName = item.dataset.filename;
-
-    if (!confirm(`Delete "${fileName.replace('.mp3', '')}"?\nThis cannot be undone.`)) return;
-
-    btn.disabled    = true;
-    btn.textContent = 'Deleting...';
-
-    // Stop audio if this track is currently playing
-    const playBtn = item.querySelector('.play-btn');
-    if (currentBtn === playBtn) stopAudio();
-
-    const { error } = await sb.storage
-      .from('recordings')
-      .remove([`${djName}/${fileName}`]);
-
-    if (error) {
-      btn.disabled    = false;
-      btn.textContent = '✕ Delete';
-      alert('Failed to delete: ' + error.message);
-      return;
-    }
-
-    logEvent('delete', { file: fileName });
-    item.style.transition = 'opacity 0.3s, transform 0.3s';
-    item.style.opacity    = '0';
-    item.style.transform  = 'translateX(-10px)';
-    setTimeout(() => { item.remove(); updateStats(); }, 300);
-  }
-
-  function updateStats() {
-    const items     = document.querySelectorAll('.recording-item');
-    const count     = items.length;
-    const totalSize = Array.from(items).reduce((acc, el) => acc + parseInt(el.dataset.size || 0, 10), 0);
-
-    if (count === 0) {
-      document.getElementById('stats').style.display = 'none';
-      document.getElementById('page-subtitle').textContent = 'No sets yet — get recording!';
-      document.getElementById('recordings-container').innerHTML = `
-        <div class="empty">
-          <div class="empty-icon">💿</div>
-          <div class="empty-title">No Sets Yet</div>
-          <div class="empty-sub">Your recordings will appear here once you go live</div>
-        </div>`;
-      return;
-    }
-
-    document.getElementById('stat-count').textContent = count;
-    document.getElementById('stat-size').textContent  = formatBytes(totalSize);
-    document.getElementById('page-subtitle').textContent = `${count} recording${count !== 1 ? 's' : ''} in your vault`;
-  }
-
-  function togglePlay(url, name, btnId) {
-    const btn = document.getElementById(btnId);
-
-    if (currentAudio === url && !player.paused) {
-      player.pause();
-      setPlayIcon(btn, false);
-      document.getElementById('now-playing').classList.remove('visible');
-      currentAudio = null;
-      currentBtn   = null;
-      return;
-    }
-
-    if (currentBtn) setPlayIcon(currentBtn, false);
-
-    player.src = url;
-    player.play();
-    currentAudio = url;
-    currentBtn   = btn;
-    setPlayIcon(btn, true);
-    document.getElementById('np-name').textContent = name.replace('.mp3', '');
-    document.getElementById('now-playing').classList.add('visible');
-  }
-
-  function setPlayIcon(btn, playing) {
-    btn.innerHTML = playing
-      ? `<svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>`
-      : `<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>`;
-  }
-
-  function stopAudio() {
-    player.pause();
-    player.src = '';
-    if (currentBtn) setPlayIcon(currentBtn, false);
-    document.getElementById('now-playing').classList.remove('visible');
-    currentAudio = null;
-    currentBtn   = null;
-  }
-
-  player.addEventListener('ended', () => {
-    if (currentBtn) setPlayIcon(currentBtn, false);
-    document.getElementById('now-playing').classList.remove('visible');
-    currentAudio = null;
-    currentBtn   = null;
-  });
-
-  // 2-minute preview limit for free tier
-  player.addEventListener('timeupdate', () => {
-    if (userTier === 'free' && player.currentTime >= 120) {
-      stopAudio();
-      showUpgradeToast();
-    }
-  });
-
-  function showUpgradeToast() {
+  function showToast(msg) {
     const toast = document.getElementById('toast');
-    toast.innerHTML = 'Free preview ends at 2 min &nbsp;·&nbsp; <a href="pricing.html" style="color:var(--gold);text-decoration:none">Upgrade to listen in full →</a>';
+    toast.textContent = msg;
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 6000);
+    clearTimeout(toast._t);
+    toast._t = setTimeout(() => toast.classList.remove('show'), 3000);
   }
 
   async function logout() {
