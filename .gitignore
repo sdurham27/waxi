@@ -1,0 +1,2 @@
+# Never commit the recorder — it contains the Supabase service role key
+dj_recorder.py
