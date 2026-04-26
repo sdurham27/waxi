@@ -660,9 +660,22 @@
     'sb_publishable_f0T6tAUq16w1d9s4Dssv-Q_y4OMLaYx'
   );
 
-  // Redirect if already logged in
+  let recoveryMode = false;
+
+  // Must be registered BEFORE getSession so it can set recoveryMode first
+  sb.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') {
+      recoveryMode = true;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.getElementById('panel-newpass').classList.add('active');
+      document.getElementById('auth').scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  // Redirect if already logged in (but not during a password recovery flow)
   sb.auth.getSession().then(({ data }) => {
-    if (data.session) window.location.href = 'dashboard.html';
+    if (data.session && !recoveryMode) window.location.href = 'dashboard.html';
   });
 
   // Sticky nav on scroll
@@ -701,7 +714,7 @@
     btn.textContent = 'Sending...';
 
     const { error } = await sb.auth.resetPasswordForEmail(email, {
-      redirectTo: 'https://waxi-theta.vercel.app/#auth',
+      redirectTo: 'https://waxi-theta.vercel.app/index.html',
     });
 
     if (error) {
@@ -734,15 +747,6 @@
     }
   }
 
-  // Detect password recovery redirect from email link
-  sb.auth.onAuthStateChange((event) => {
-    if (event === 'PASSWORD_RECOVERY') {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-      document.getElementById('panel-newpass').classList.add('active');
-      document.getElementById('auth').scrollIntoView({ behavior: 'smooth' });
-    }
-  });
 
   function msg(id, text, type) {
     const el = document.getElementById(id);
